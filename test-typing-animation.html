@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Animation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f23;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .section-content {
+            max-width: 800px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .fade-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .fade-scroll.fade-scroll--visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .typing-root {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: pre-wrap;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .typing-text {
+            color: inherit;
+            opacity: 0;
+            filter: blur(4px);
+            transition: opacity 0.5s ease-out, filter 0.5s ease-out;
+            min-height: 1.2em;
+        }
+        
+        .typing-text[data-typed="true"] {
+            opacity: 1;
+            filter: blur(0px);
+        }
+        
+        .typing-cursor {
+            width: 2px;
+            height: 1em;
+            margin-left: 4px;
+            background: currentcolor;
+            opacity: 1;
+            transform: scaleY(1);
+            will-change: opacity, transform;
+            animation: blink 0.8s infinite, cursorFadeIn 0.3s ease-out;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px currentcolor;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scaleY(1); }
+            50% { opacity: 0.3; transform: scaleY(0.8); }
+        }
+        @keyframes cursorFadeIn {
+            from { opacity: 0; transform: scaleY(0); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
+        @keyframes cursorFadeOut {
+            from { opacity: 1; transform: scaleY(1); }
+            to { opacity: 0; transform: scaleY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 1</h2>
+            <p>This is the first section. Scroll down to see the typing animation.</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 2</h2>
+            <p class="typing-container">
+                <span class="typing-text">This text should appear when scrolled into view...</span>
+                <span class="typing-cursor"></span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 3</h2>
+            <p class="typing-container">
+                <span class="typing-text">Another typing animation here!</span>
+                <span class="typing-cursor"></span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 4</h2>
+            <p class="typing-container">
+                <span class="typing-text">Final typing animation at the bottom.</span>
+                <span class="typing-cursor"></span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Intersection Observer to detect when elements come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Add the visible class to trigger fade-in
+                    entry.target.classList.add('fade-scroll--visible');
+                    
+                    // Find typing text within this element and start animation
+                    const typingContainers = entry.target.querySelectorAll('.typing-container');
+                    typingContainers.forEach(container => {
+                        const textElement = container.querySelector('.typing-text');
+                        const cursorElement = container.querySelector('.typing-cursor');
+                        
+                        // Start typing animation after a short delay
+                        setTimeout(() => {
+                            startTypingAnimation(textElement, cursorElement);
+                        }, 300);
+                    });
+                    
+                    // Disconnect observer after element is triggered to prevent re-triggering
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1, // Trigger when 10% of element is visible
+            rootMargin: '0px 0px -100px 0px' // Trigger slightly before element enters viewport
+        });
+
+        // Observe all fade-scroll elements
+        document.querySelectorAll('.fade-scroll').forEach(element => {
+            observer.observe(element);
+        });
+
+        function startTypingAnimation(textElement, cursorElement) {
+            const fullText = textElement.textContent;
+            textElement.textContent = '';
+            
+            let i = 0;
+            const speed = 35; // ms per character
+            
+            const timer = setInterval(() => {
+                if (i < fullText.length) {
+                    textElement.textContent += fullText.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                    // Hide cursor after typing is complete
+                    setTimeout(() => {
+                        cursorElement.style.opacity = '0';
+                        cursorElement.style.transform = 'scaleY(0)';
+                    }, 300);
+                }
+            }, speed);
+        }
+    </script>
+</body>
+</html>

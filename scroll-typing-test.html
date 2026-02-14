@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scroll-Triggered Typing Animation Test</title>
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #02030a;
+            color: #e6f3ff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 200vh; /* Make page tall enough to scroll */
+        }
+        
+        .section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .section-content {
+            max-width: 800px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            background: linear-gradient(135deg, rgba(220,215,255,0.95) 0%, rgba(180,200,255,0.85) 50%, rgba(160,220,255,0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .fade-scroll {
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            filter: blur(10px);
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                        filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform, filter;
+        }
+        
+        .fade-scroll--visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0px);
+        }
+        
+        .typing-root {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: pre-wrap;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .typing-text {
+            color: inherit;
+            opacity: 0;
+            filter: blur(4px);
+            transition: opacity 0.5s ease-out, filter 0.5s ease-out;
+            min-height: 1.2em;
+        }
+        
+        .typing-cursor {
+            width: 2px;
+            height: 1em;
+            margin-left: 4px;
+            background: currentcolor;
+            opacity: 1;
+            transform: scaleY(1);
+            will-change: opacity, transform;
+            animation: blink 0.8s infinite, cursorFadeIn 0.3s ease-out;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px currentcolor;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scaleY(1); }
+            50% { opacity: 0.3; transform: scaleY(0.8); }
+        }
+        @keyframes cursorFadeIn {
+            from { opacity: 0; transform: scaleY(0); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
+        @keyframes cursorFadeOut {
+            from { opacity: 1; transform: scaleY(1); }
+            to { opacity: 0; transform: scaleY(0); }
+        }
+        
+        .instructions {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(123, 92, 246, 0.3);
+            max-width: 300px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <strong>Scroll Down to Test Animations</strong><br>
+        Each section contains a typing animation that should trigger when scrolled into view.
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 1</h2>
+            <p>Start of page - nothing to see here yet.</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 2</h2>
+            <p class="typing-container">
+                <span class="typing-root">
+                    <span class="typing-text" data-full-text="Welcome to the scroll-triggered typing animation demo!">Welcome to the scroll-triggered typing animation demo!</span>
+                    <span class="typing-cursor"></span>
+                </span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 3</h2>
+            <p class="typing-container">
+                <span class="typing-root">
+                    <span class="typing-text" data-full-text="As you scroll down, each typing animation will trigger automatically!">As you scroll down, each typing animation will trigger automatically!</span>
+                    <span class="typing-cursor"></span>
+                </span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-content fade-scroll">
+            <h2>Section 4</h2>
+            <p class="typing-container">
+                <span class="typing-root">
+                    <span class="typing-text" data-full-text="This demonstrates the scroll-triggered typing functionality working perfectly!">This demonstrates the scroll-triggered typing functionality working perfectly!</span>
+                    <span class="typing-cursor"></span>
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Intersection Observer to detect when elements come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Add the visible class to trigger fade-in
+                    entry.target.classList.add('fade-scroll--visible');
+                    
+                    // Find typing text within this element and start animation
+                    const typingContainers = entry.target.querySelectorAll('.typing-container');
+                    typingContainers.forEach(container => {
+                        const textElement = container.querySelector('.typing-text');
+                        const cursorElement = container.querySelector('.typing-cursor');
+                        const fullText = textElement.getAttribute('data-full-text');
+                        
+                        // Start typing animation after a short delay
+                        setTimeout(() => {
+                            startTypingAnimation(textElement, cursorElement, fullText);
+                        }, 300);
+                    });
+                    
+                    // Disconnect observer after element is triggered to prevent re-triggering
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1, // Trigger when 10% of element is visible
+            rootMargin: '0px 0px -100px 0px' // Trigger slightly before element enters viewport
+        });
+
+        // Observe all fade-scroll elements
+        document.querySelectorAll('.fade-scroll').forEach(element => {
+            observer.observe(element);
+        });
+
+        function startTypingAnimation(textElement, cursorElement, fullText) {
+            textElement.textContent = '';
+            
+            let i = 0;
+            const speed = 35; // ms per character
+            
+            const timer = setInterval(() => {
+                if (i < fullText.length) {
+                    textElement.textContent += fullText.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(timer);
+                    // Hide cursor after typing is complete
+                    setTimeout(() => {
+                        cursorElement.style.opacity = '0';
+                        cursorElement.style.transform = 'scaleY(0)';
+                    }, 300);
+                }
+            }, speed);
+        }
+    </script>
+</body>
+</html>
