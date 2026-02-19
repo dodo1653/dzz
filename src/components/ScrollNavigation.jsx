@@ -274,7 +274,7 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
           color: 'rgba(255, 255, 255, 0.6)',
           letterSpacing: '-0.01em',
         }}>
-          every tool you need.
+          every tool you <span style={{ color: 'rgba(130, 255, 180, 0.7)' }}>need</span>.
         </h2>
       </motion.div>
       

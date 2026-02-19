@@ -156,7 +156,7 @@ const WalletCard = memo(function WalletCard() {
     const solflareAvailable = walletMeta.solflareAvailable;
 
     const SolanaLogo = () => (
-      <svg width="28" height="28" viewBox="0 0 397.7 311.7" style={{ display: 'block' }}>
+      <svg width="32" height="32" viewBox="0 0 397.7 311.7" style={{ display: 'block', opacity: 0.5 }}>
         <defs>
           <linearGradient id="solGradientModal" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#00FFA3"/>
@@ -176,7 +176,7 @@ const WalletCard = memo(function WalletCard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             style={{
               position: 'fixed',
               inset: 0,
@@ -185,91 +185,51 @@ const WalletCard = memo(function WalletCard() {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '20px',
-              background: 'rgba(8, 8, 16, 0.9)',
-              backdropFilter: 'blur(20px)',
+              background: 'rgba(8, 8, 14, 0.95)',
+              backdropFilter: 'blur(30px)',
             }}
             onClick={() => setShowWalletModal(false)}
           >
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               style={{
                 width: '100%',
-                maxWidth: '380px',
-                background: 'linear-gradient(165deg, rgba(14, 14, 24, 0.95), rgba(10, 10, 18, 0.98))',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '18px',
+                maxWidth: '340px',
+                background: 'linear-gradient(180deg, rgba(18, 18, 28, 0.98), rgba(12, 12, 20, 0.99))',
+                border: '1px solid rgba(255, 255, 255, 0.04)',
+                borderRadius: '16px',
                 overflow: 'hidden',
-                boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.6)',
+                boxShadow: '0 40px 80px -20px rgba(0, 0, 0, 0.7)',
               }}
             >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '1px',
-                background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent)',
-              }} />
-
               <div style={{ padding: '1.75rem' }}>
                 {/* Header */}
                 <div style={{
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
                   marginBottom: '2rem',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <SolanaLogo />
-                    <div>
-                      <h2 style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.9rem',
-                        fontWeight: 500,
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        margin: 0,
-                        letterSpacing: '0.02em',
-                      }}>
-                        connect wallet
-                      </h2>
-                      <p style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.65rem',
-                        color: 'rgba(255, 255, 255, 0.3)',
-                        margin: '0.25rem 0 0',
-                      }}>
-                        select your wallet
-                      </p>
-                    </div>
-                  </div>
-                  <motion.button
-                    onClick={() => setShowWalletModal(false)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'rgba(255, 255, 255, 0.4)',
-                      fontSize: '1rem',
-                    }}
-                  >
-                    ×
-                  </motion.button>
+                  <SolanaLogo />
+                  <h2 style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    margin: '1rem 0 0',
+                    letterSpacing: '0.05em',
+                    textTransform: 'lowercase',
+                  }}>
+                    connect wallet
+                  </h2>
                 </div>
 
                 {/* Wallet Options */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {[
                     { name: 'Phantom', available: phantomAvailable, icon: walletMeta.phantom?.adapter?.icon },
                     { name: 'Solflare', available: solflareAvailable, icon: walletMeta.solflare?.adapter?.icon },
@@ -283,34 +243,34 @@ const WalletCard = memo(function WalletCard() {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.85rem',
-                        padding: '0.9rem 1rem',
-                        background: 'rgba(255, 255, 255, 0.015)',
+                        gap: '0.75rem',
+                        padding: '0.85rem 1rem',
+                        background: 'rgba(255, 255, 255, 0.02)',
                         border: '1px solid rgba(255, 255, 255, 0.04)',
-                        borderRadius: '12px',
+                        borderRadius: '10px',
                         cursor: 'pointer',
                         textAlign: 'left',
+                        transition: 'all 0.15s ease',
                       }}
                     >
                       <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
                         background: 'rgba(255, 255, 255, 0.02)',
-                        border: '1px solid rgba(255, 255, 255, 0.04)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         overflow: 'hidden',
                       }}>
                         {w.icon ? (
-                          <img src={w.icon} alt={w.name} style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                          <img src={w.icon} alt={w.name} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                         ) : (
                           <span style={{
                             fontFamily: "'JetBrains Mono', monospace",
-                            fontSize: '0.8rem',
+                            fontSize: '0.7rem',
                             fontWeight: 500,
-                            color: 'rgba(255, 255, 255, 0.4)',
+                            color: 'rgba(255, 255, 255, 0.3)',
                           }}>
                             {w.name[0]}
                           </span>
@@ -319,26 +279,27 @@ const WalletCard = memo(function WalletCard() {
                       <div style={{ flex: 1 }}>
                         <div style={{
                           fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: '0.75rem',
+                          fontSize: '0.7rem',
                           fontWeight: 500,
-                          color: 'rgba(255, 255, 255, 0.55)',
+                          color: 'rgba(255, 255, 255, 0.5)',
+                          textTransform: 'lowercase',
                         }}>
                           {w.name}
                         </div>
                         <div style={{
                           fontFamily: "'JetBrains Mono', monospace",
                           fontSize: '0.6rem',
-                          color: 'rgba(255, 255, 255, 0.3)',
-                          marginTop: '0.15rem',
+                          color: 'rgba(255, 255, 255, 0.25)',
+                          marginTop: '0.1rem',
                         }}>
                           {w.available ? 'installed' : 'install'}
                         </div>
                       </div>
                       <div style={{
-                        width: '6px',
-                        height: '6px',
+                        width: '5px',
+                        height: '5px',
                         borderRadius: '50%',
-                        background: w.available ? 'rgba(130, 255, 180, 0.5)' : 'rgba(255, 255, 255, 0.15)',
+                        background: w.available ? 'rgba(130, 255, 180, 0.4)' : 'rgba(255, 255, 255, 0.1)',
                       }} />
                     </motion.button>
                   ))}
@@ -347,23 +308,23 @@ const WalletCard = memo(function WalletCard() {
                 {/* Error State */}
                 {(connectError || (!phantomAvailable && !solflareAvailable)) && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{
-                      marginTop: '0.85rem',
-                      padding: '0.75rem 1rem',
-                      background: 'rgba(255, 100, 100, 0.05)',
-                      border: '1px solid rgba(255, 100, 100, 0.1)',
-                      borderRadius: '10px',
+                      marginTop: '0.75rem',
+                      padding: '0.65rem 0.85rem',
+                      background: 'rgba(255, 80, 80, 0.03)',
+                      border: '1px solid rgba(255, 80, 80, 0.08)',
+                      borderRadius: '8px',
                     }}
                   >
                     <p style={{
                       fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: '0.65rem',
-                      color: 'rgba(255, 255, 255, 0.45)',
+                      fontSize: '0.6rem',
+                      color: 'rgba(255, 255, 255, 0.35)',
                       margin: 0,
                     }}>
-                      {connectError || 'no supported wallet detected'}
+                      {connectError || 'no wallet detected'}
                     </p>
                   </motion.div>
                 )}
@@ -371,36 +332,61 @@ const WalletCard = memo(function WalletCard() {
                 {/* Connecting State */}
                 {connecting && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{
-                      marginTop: '0.85rem',
-                      padding: '0.75rem 1rem',
+                      marginTop: '0.75rem',
+                      padding: '0.65rem 0.85rem',
                       background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '10px',
+                      border: '1px solid rgba(255, 255, 255, 0.03)',
+                      borderRadius: '8px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.75rem',
+                      gap: '0.6rem',
                     }}
                   >
                     <div style={{
-                      width: '14px',
-                      height: '14px',
+                      width: '12px',
+                      height: '12px',
                       borderRadius: '50%',
-                      border: '2px solid rgba(255, 255, 255, 0.1)',
-                      borderTopColor: 'rgba(255, 255, 255, 0.5)',
-                      animation: 'spin 0.8s linear infinite',
+                      border: '1.5px solid rgba(255, 255, 255, 0.1)',
+                      borderTopColor: 'rgba(255, 255, 255, 0.4)',
+                      animation: 'spin 0.7s linear infinite',
                     }} />
                     <span style={{
                       fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: '0.7rem',
-                      color: 'rgba(255, 255, 255, 0.4)',
+                      fontSize: '0.65rem',
+                      color: 'rgba(255, 255, 255, 0.35)',
                     }}>
                       connecting...
                     </span>
                   </motion.div>
                 )}
+
+                {/* Close button */}
+                <motion.button
+                  onClick={() => setShowWalletModal(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    width: '24px',
+                    height: '24px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.04)',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'rgba(255, 255, 255, 0.25)',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  ×
+                </motion.button>
               </div>
 
               <style>{`
@@ -589,132 +575,105 @@ const WalletCard = memo(function WalletCard() {
               @keyframes glow {0%, 100%{box-shadow: 0 0 8px rgba(123, 92, 246, 0.3);} 50%{box-shadow: 0 0 20px rgba(123, 92, 246, 0.6);}}
             `}</style>
             <div style={{
-              padding: '24px',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255,255,255,0.06)',
+              padding: '20px',
+              background: 'rgba(255,255,255,0.015)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.04)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              gap: '20px',
             }}>
+              {/* SOL Balance - Aesthetic Display */}
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
               }}>
-                <div className="balance-label" style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontSize: '15px',
-                  fontWeight: 500,
-                  color: 'rgba(255, 255, 255, 0.7)',
+                <div style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.7rem',
+                  fontWeight: 400,
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'lowercase',
                 }}>
-                  SOL Balance
+                  balance
                 </div>
-                <div className="balance-value">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {loading ? (
                     <span style={{
-                      opacity: 0.85,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.3)',
                       animation: 'pulse 1.2s ease-in-out infinite',
-                      fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-                      fontWeight: 800,
-                      fontSize: '20px',
-                      color: '#A9F5F9',
-                      textShadow: '0 0 12px rgba(169, 245, 249, 0.7)'
                     }}>
-                      Loading...
+                      loading...
                     </span>
-                  ) : (balance != null ? (
-                    <span style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-                      fontWeight: 700,
-                      fontSize: '18px',
-                      color: '#E3DFFF',
-                      textShadow: '0 0 12px rgba(227, 223, 255, 0.5)'
-                    }}>
-                      <svg width="20" height="20" viewBox="0 0 397.7 311.7" style={{ display: 'inline-block' }}>
+                  ) : balance != null ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg width="16" height="16" viewBox="0 0 397.7 311.7" style={{ opacity: 0.4 }}>
                         <defs>
-                          <linearGradient id="solGradient" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientUnits="userSpaceOnUse">
+                          <linearGradient id="solGradientBalance" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientUnits="userSpaceOnUse">
                             <stop offset="0" stopColor="#00FFA3"/>
                             <stop offset="1" stopColor="#DC1FFF"/>
                           </linearGradient>
                         </defs>
-                        <path fill="url(#solGradient)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
-                        <path fill="url(#solGradient)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
-                        <path fill="url(#solGradient)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
+                        <path fill="url(#solGradientBalance)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
+                        <path fill="url(#solGradientBalance)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
+                        <path fill="url(#solGradientBalance)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
                       </svg>
                       <span style={{
-                        color: 'white',
-                        textShadow: '0 0 20px rgba(255, 255, 255, 0.9)'
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '1.1rem',
+                        fontWeight: 500,
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        letterSpacing: '-0.02em',
                       }}>
                         {balance}
                       </span>
-                    </span>
-                  ) : "—")}
+                      <span style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: '0.7rem',
+                        fontWeight: 400,
+                        color: 'rgba(255, 255, 255, 0.3)',
+                        letterSpacing: '0.02em',
+                      }}>
+                        SOL
+                      </span>
+                    </div>
+                  ) : (
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.3)',
+                    }}>—</span>
+                  )}
                 </div>
               </div>
+              
+              {/* Address - Aesthetic Display */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '14px 16px',
-                background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(10, 10, 20, 0.8))',
-                borderRadius: '12px',
-                fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace",
-                fontSize: '13px',
-                fontWeight: 400,
-                letterSpacing: '0.1em',
-                transition: 'all 0.3s ease',
-                border: '1px solid rgba(0, 240, 255, 0.25)',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: 'inset 0 1px 3px rgba(0, 240, 255, 0.15), 0 0 25px rgba(0, 240, 255, 0.08), 0 0 50px rgba(0, 240, 255, 0.03)',
+                gap: '10px',
+                padding: '12px 14px',
+                background: 'rgba(255, 255, 255, 0.02)',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.03)',
               }}>
-                {/* Terminal scanline effect */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  background: 'linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.6), transparent)',
-                  animation: 'terminalScanline 3s ease-in-out infinite',
-                  zIndex: 1,
-                }} />
                 <span style={{
-                  color: '#00f0ff',
-                  textShadow: '0 0 8px rgba(0, 240, 255, 0.9), 0 0 16px rgba(0, 240, 255, 0.5), 0 0 24px rgba(0, 240, 255, 0.2)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.7rem',
+                  fontWeight: 400,
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  letterSpacing: '0.02em',
                   flex: 1,
-                  fontFamily: 'inherit',
-                  background: 'linear-gradient(90deg, #00f0ff 0%, #7dd3fc 50%, #00f0ff 100%)',
-                  backgroundSize: '200% 100%',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  wordBreak: 'break-all',
-                  lineHeight: '1.6',
-                  animation: 'terminalGlow 3s ease-in-out infinite, terminalShimmer 4s ease-in-out infinite',
-                  position: 'relative',
-                  zIndex: 2,
-                  fontVariantLigatures: 'none',
-                  fontFeatureSettings: '"liga" 0, "calt" 0',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}>
-                  {publicKey ? publicKey.toBase58() : "—"}
+                  {publicKey ? `${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-8)}` : '—'}
                 </span>
-                <style>{`
-                  @keyframes terminalScanline {
-                    0% { transform: translateY(0); opacity: 0.3; }
-                    50% { opacity: 1; }
-                    100% { transform: translateY(100%); opacity: 0.3; }
-                  }
-                  @keyframes terminalShimmer {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                  }
-                `}</style>
                 <button
                   onClick={() => {
                     if (publicKey) {
@@ -724,66 +683,38 @@ const WalletCard = memo(function WalletCard() {
                       });
                     }
                   }}
-                  title="Copy address to clipboard"
+                  title="Copy address"
                   style={{
-                    background: copied ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                    border: copied ? '1px solid rgba(0, 255, 136, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
-                    color: copied ? '#00ff88' : 'rgba(255, 255, 255, 0.7)',
+                    background: copied ? 'rgba(130, 255, 180, 0.08)' : 'transparent',
+                    border: '1px solid ' + (copied ? 'rgba(130, 255, 180, 0.2)' : 'rgba(255, 255, 255, 0.06)'),
+                    color: copied ? 'rgba(130, 255, 180, 0.7)' : 'rgba(255, 255, 255, 0.3)',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     padding: '6px 8px',
-                    borderRadius: '6px',
+                    borderRadius: '4px',
                     transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '32px',
-                    minHeight: '32px',
                   }}
-                  onMouseEnter={(e) => {
-                    if (!copied) {
-                      e.target.style.background = 'rgba(0, 240, 255, 0.15)';
-                      e.target.style.borderColor = 'rgba(0, 240, 255, 0.3)';
-                      e.target.style.color = '#00f0ff';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!copied) {
-                      e.target.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                      e.target.style.color = 'rgba(255, 255, 255, 0.7)';
-                    }
-                  }}
-                  className="copy-btn"
                 >
                   {copied ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                     </svg>
                   )}
                 </button>
               </div>
-              <style>{`
-                @keyframes terminalGlow {
-                  0%, 100% {
-                    filter: brightness(1) drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
-                  }
-                  50% {
-                    filter: brightness(1.2) drop-shadow(0 0 12px rgba(0, 240, 255, 0.9));
-                  }
-                }
-              `}</style>
             </div>
            </div>
          )}
        </div>
 
-       {/* Wallet selection modal */}
        {renderWalletModal()}
      </div>
    );

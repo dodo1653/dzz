@@ -57,8 +57,8 @@ export default function ParticlesBackground({ particleCount = 120 }) {
 
     // Track mouse movement for interaction
     function mouseMove(e) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      mouseX = -100;
+      mouseY = -100;
     }
 
     function mouseLeave() {

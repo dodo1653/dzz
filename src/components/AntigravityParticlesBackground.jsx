@@ -28,8 +28,8 @@ const AntigravityParticlesBackground = () => {
 
     // Mouse move handler
     const handleMouseMove = (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      mouseX = -100;
+      mouseY = -100;
     };
 
     // Mouse leave handler

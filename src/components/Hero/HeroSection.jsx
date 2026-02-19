@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useTransform as useTransformMotion } from 'framer-motion';
 import HolographicTerminal from './HolographicTerminal';
 import TypingText from '../TypingText';
 import { useReducedMotion, useMediaQuery } from '../../hooks/useReducedMotion';
@@ -27,6 +27,7 @@ const HeroSection = memo(function HeroSection({
   const [showContent, setShowContent] = useState(false);
   const [expandedActivity, setExpandedActivity] = useState(null);
   const containerRef = useRef(null);
+  const activityRef = useRef(null);
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -38,6 +39,26 @@ const HeroSection = memo(function HeroSection({
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 300]);
   const parallaxOpacity = useTransform(scrollYProgress, [0, 0.3, 0.6, 1], [0, 0.15, 0.08, 0]);
   const parallaxScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.2]);
+
+  const activityMouseX = useMotionValue(0);
+  const activityMouseY = useMotionValue(0);
+  const activityRotateX = useSpring(useTransformMotion(activityMouseY, [-0.5, 0.5], [8, -8]), { stiffness: 300, damping: 30 });
+  const activityRotateY = useSpring(useTransformMotion(activityMouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 300, damping: 30 });
+
+  const handleActivityMouseMove = (e) => {
+    if (reducedMotion || isMobile) return;
+    const rect = activityRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    activityMouseX.set(x);
+    activityMouseY.set(y);
+  };
+
+  const handleActivityMouseLeave = () => {
+    activityMouseX.set(0);
+    activityMouseY.set(0);
+  };
 
   useEffect(() => {
     if (reducedMotion) {
@@ -68,7 +89,6 @@ const HeroSection = memo(function HeroSection({
           top: '50%',
           left: '50%',
           x: '-50%',
-          y: '-50%',
           y: parallaxY,
           opacity: parallaxOpacity,
           scale: parallaxScale,
@@ -315,23 +335,35 @@ const HeroSection = memo(function HeroSection({
             >
               <HolographicTerminal width={isMobile ? 340 : 400} height={isMobile ? 320 : 380} />
               
-              {/* Activity Panel with Interactive Effects */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 }}
-                whileHover={{ scale: 1.01 }}
+              {/* Activity Panel with Tilt Effects */}
+              <div
                 style={{
+                  perspective: 1000,
+                  transformStyle: 'preserve-3d',
                   width: isMobile ? '340px' : '360px',
-                  padding: '1.5rem',
-                  background: 'linear-gradient(165deg, rgba(12, 12, 22, 0.85), rgba(6, 6, 14, 0.9))',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  backdropFilter: 'blur(20px)',
-                  boxShadow: '0 25px 50px -15px rgba(0, 0, 0, 0.5)',
-                  cursor: 'pointer',
                 }}
               >
+                <motion.div
+                  ref={activityRef}
+                  onMouseMove={handleActivityMouseMove}
+                  onMouseLeave={handleActivityMouseLeave}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                  style={{
+                    width: '100%',
+                    padding: '1.5rem',
+                    background: 'linear-gradient(165deg, rgba(12, 12, 22, 0.85), rgba(6, 6, 14, 0.9))',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderRadius: '16px',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 25px 50px -15px rgba(0, 0, 0, 0.5)',
+                    cursor: 'pointer',
+                    rotateX: reducedMotion || isMobile ? 0 : activityRotateX,
+                    rotateY: reducedMotion || isMobile ? 0 : activityRotateY,
+                    transformStyle: 'preserve-3d',
+                  }}
+                >
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -419,7 +451,8 @@ const HeroSection = memo(function HeroSection({
                     </span>
                   </motion.div>
                 ))}
-              </motion.div>
+                </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
