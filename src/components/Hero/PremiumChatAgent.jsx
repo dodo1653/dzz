@@ -44,7 +44,7 @@ const TypewriterText = memo(function TypewriterText({ text, speed = 20, onComple
             display: 'inline-block',
             width: '2px',
             height: '1em',
-            background: 'rgba(255, 255, 255, 0.6)',
+            background: 'rgba(255, 255, 255, 0.4)',
             marginLeft: '2px',
             verticalAlign: 'text-bottom',
           }}
@@ -57,7 +57,6 @@ const TypewriterText = memo(function TypewriterText({ text, speed = 20, onComple
 const PremiumChatAgent = memo(function PremiumChatAgent({
   initialMessages = [],
   onMessage,
-  className = '',
 }) {
   const [messages, setMessages] = useState(initialMessages.length > 0 ? initialMessages : [
     {
@@ -73,26 +72,9 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
   const [isFocused, setIsFocused] = useState(false);
   const [error, setError] = useState(null);
   const [typingMessageId, setTypingMessageId] = useState(null);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const containerRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
-
-  const handleMouseMove = (e) => {
-    if (!containerRef.current || reducedMotion || isMobile) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rotateX = (e.clientY - centerY) / 30;
-    const rotateY = (e.clientX - centerX) / 30;
-    setRotation({ x: -rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setRotation({ x: 0, y: 0 });
-  };
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -118,27 +100,18 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
     setIsTyping(true);
     setError(null);
 
-    if (onMessage) {
-      onMessage(userMessage);
-    }
+    if (onMessage) onMessage(userMessage);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages.slice(1).map(m => ({
-            role: m.role,
-            content: m.content,
-          })), { role: 'user', content: userMessage.content }],
+          messages: [...messages.slice(1).map(m => ({ role: m.role, content: m.content })), { role: 'user', content: userMessage.content }],
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
+      if (!response.ok) throw new Error('Failed to get response');
 
       const data = await response.json();
       
@@ -154,116 +127,98 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
       setTypingMessageId(aiMessage.id);
       
       setTimeout(() => {
-        setMessages(prev => 
-          prev.map(m => m.id === aiMessage.id ? { ...m, isTyping: false } : m)
-        );
+        setMessages(prev => prev.map(m => m.id === aiMessage.id ? { ...m, isTyping: false } : m));
         setTypingMessageId(null);
       }, 1500);
 
     } catch (err) {
-      setError('Failed to send message. Please try again.');
-      console.error('Chat error:', err);
+      setError('Failed to send message.');
     } finally {
       setIsTyping(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        width: '100%',
-        maxWidth: '720px',
-        background: 'rgba(8, 8, 14, 0.6)',
-        border: '1px solid rgba(255, 255, 255, 0.04)',
-        borderRadius: '18px',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        overflow: 'hidden',
-        transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-        transition: 'transform 0.15s ease-out',
-        boxShadow: `
-          0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-          0 20px 50px -15px rgba(0, 0, 0, 0.5),
-          0 0 60px -30px rgba(123, 92, 246, 0.1)
-        `,
-      }}
-    >
+    <div style={{
+      width: '100%',
+      maxWidth: isMobile ? '340px' : '440px',
+      background: 'linear-gradient(165deg, rgba(12, 12, 20, 0.85), rgba(6, 6, 14, 0.9))',
+      border: '1px solid rgba(255, 255, 255, 0.05)',
+      borderRadius: '16px',
+      backdropFilter: 'blur(20px)',
+      overflow: 'hidden',
+      boxShadow: '0 25px 50px -15px rgba(0, 0, 0, 0.5)',
+    }}>
       <div style={{
-        padding: '1rem 1.25rem',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent)',
+      }} />
+
+      <div style={{
+        padding: '0.9rem 1.1rem',
         borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
+        gap: '0.6rem',
+        background: 'rgba(0, 0, 0, 0.15)',
       }}>
         <div style={{
-          width: '8px',
-          height: '8px',
+          width: '6px',
+          height: '6px',
           borderRadius: '50%',
-          background: 'rgba(74, 222, 128, 0.8)',
-          boxShadow: '0 0 8px rgba(74, 222, 128, 0.5)',
+          background: 'rgba(130, 255, 180, 0.5)',
         }} />
         <span style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontSize: '0.85rem',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '0.75rem',
           fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.8)',
+          color: 'rgba(255, 255, 255, 0.5)',
         }}>
           dzz
         </span>
         <span style={{
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.65rem',
-          color: 'rgba(255, 255, 255, 0.3)',
+          fontSize: '0.55rem',
+          color: 'rgba(255, 255, 255, 0.2)',
           marginLeft: 'auto',
+          letterSpacing: '0.06em',
         }}>
-          AI-POWERED ASSISTANT
+          AI
         </span>
       </div>
 
       <div style={{
-        padding: '1rem 1.25rem',
-        height: '200px',
+        padding: '0.9rem 1.1rem',
+        height: '180px',
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.75rem',
+        gap: '0.6rem',
       }}>
         <AnimatePresence mode="popLayout">
           {messages.map((message) => (
             <motion.div
               key={message.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -8 }}
               style={{
                 alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start',
                 maxWidth: '85%',
-                padding: '0.6rem 0.9rem',
-                borderRadius: message.role === 'user' 
-                  ? '12px 12px 4px 12px' 
-                  : '12px 12px 12px 4px',
-                background: message.role === 'user' 
-                  ? 'rgba(255, 255, 255, 0.06)'
-                  : 'rgba(255, 255, 255, 0.02)',
-                border: `1px solid ${message.role === 'user' 
-                  ? 'rgba(255, 255, 255, 0.06)' 
-                  : 'rgba(255, 255, 255, 0.03)'}`,
+                padding: '0.55rem 0.85rem',
+                borderRadius: message.role === 'user' ? '10px 10px 3px 10px' : '10px 10px 10px 3px',
+                background: message.role === 'user' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.01)',
+                border: '1px solid rgba(255, 255, 255, 0.03)',
               }}
             >
               <p style={{
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.75rem',
-                color: 'rgba(255, 255, 255, 0.75)',
+                fontSize: '0.72rem',
+                color: 'rgba(255, 255, 255, 0.5)',
                 margin: 0,
                 lineHeight: 1.6,
               }}>
@@ -284,24 +239,18 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
             style={{
               alignSelf: 'flex-start',
               display: 'flex',
-              gap: '4px',
-              padding: '0.5rem 0.75rem',
-              background: 'rgba(255, 255, 255, 0.02)',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.03)',
+              gap: '3px',
+              padding: '0.4rem 0.6rem',
+              background: 'rgba(255, 255, 255, 0.01)',
+              borderRadius: '6px',
             }}
           >
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                animate={{ opacity: [0.3, 0.8, 0.3], y: [0, -2, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
-                style={{
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.5)',
-                }}
+                animate={{ opacity: [0.2, 0.5, 0.2], y: [0, -2, 0] }}
+                transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
+                style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.3)' }}
               />
             ))}
           </motion.div>
@@ -311,55 +260,47 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
       </div>
 
       <form onSubmit={handleSubmit} style={{
-        padding: '1rem 1.25rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.03)',
+        padding: '0.9rem 1.1rem',
+        borderTop: '1px solid rgba(255, 255, 255, 0.02)',
+        background: 'rgba(0, 0, 0, 0.1)',
       }}>
-        <div style={{
-          display: 'flex',
-          gap: '0.75rem',
-          alignItems: 'center',
-        }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <input
-            ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSubmit(e))}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder="Ask about any token or wallet..."
+            placeholder="ask about any token..."
             style={{
               flex: 1,
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: `1px solid ${isFocused ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.04)'}`,
-              borderRadius: '10px',
-              padding: '0.65rem 1rem',
+              background: 'rgba(255, 255, 255, 0.015)',
+              border: `1px solid ${isFocused ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)'}`,
+              borderRadius: '8px',
+              padding: '0.6rem 0.9rem',
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '0.75rem',
-              color: 'rgba(255, 255, 255, 0.8)',
+              fontSize: '0.72rem',
+              color: 'rgba(255, 255, 255, 0.6)',
               outline: 'none',
-              transition: 'border-color 0.2s ease',
             }}
           />
           <button
             type="submit"
             disabled={!input.trim() || isTyping}
             style={{
-              padding: '0.65rem 1.25rem',
-              background: input.trim() && !isTyping
-                ? 'linear-gradient(135deg, rgba(123, 92, 246, 0.8), rgba(0, 212, 255, 0.8))'
-                : 'rgba(255, 255, 255, 0.05)',
-              border: 'none',
-              borderRadius: '10px',
-              fontFamily: "'Archivo', sans-serif",
-              fontSize: '0.75rem',
-              fontWeight: 500,
-              color: input.trim() && !isTyping ? 'white' : 'rgba(255, 255, 255, 0.3)',
+              padding: '0.6rem 1rem',
+              background: input.trim() && !isTyping ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.01)',
+              border: '1px solid rgba(255, 255, 255, 0.03)',
+              borderRadius: '8px',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.7rem',
+              fontWeight: 400,
+              color: input.trim() && !isTyping ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
               cursor: input.trim() && !isTyping ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s ease',
             }}
           >
-            Send
+            send
           </button>
         </div>
         
@@ -367,8 +308,8 @@ const PremiumChatAgent = memo(function PremiumChatAgent({
           <p style={{
             marginTop: '0.5rem',
             fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.65rem',
-            color: 'rgba(255, 107, 107, 0.8)',
+            fontSize: '0.6rem',
+            color: 'rgba(255, 100, 100, 0.6)',
           }}>
             {error}
           </p>

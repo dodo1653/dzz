@@ -151,266 +151,404 @@ const WalletCard = memo(function WalletCard() {
   // Render wallet selection modal
   const renderWalletModal = () => {
     if (!showWalletModal) return null;
+    const premiumModal = import.meta.env.VITE_ENABLE_PREMIUM_WALLET_MODAL === 'true';
 
     const phantomAvailable = walletMeta.phantomAvailable;
     const solflareAvailable = walletMeta.solflareAvailable;
 
-    const SolanaLogo = () => (
-      <svg width="28" height="28" viewBox="0 0 397.7 311.7" style={{ display: 'block' }}>
-        <defs>
-          <linearGradient id="solGradientModal" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#00FFA3"/>
-            <stop offset="1" stopColor="#DC1FFF"/>
-          </linearGradient>
-        </defs>
-        <path fill="url(#solGradientModal)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
-        <path fill="url(#solGradientModal)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
-        <path fill="url(#solGradientModal)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
-      </svg>
-    );
+    const WalletOption = ({
+      id,
+      title,
+      subtitle,
+      available,
+      icon,
+      onClick,
+    }) => (
+      <button
+        onClick={onClick}
+        disabled={connecting}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          padding: '14px 14px',
+          borderRadius: '14px',
+          border: available ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(255,255,255,0.06)',
+          background: available ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.015)',
+          color: 'rgba(255,255,255,0.92)',
+          cursor: connecting ? 'wait' : 'pointer',
+          transition: 'transform .18s ease, background .18s ease, border-color .18s ease',
+          textAlign: 'left',
+        }}
+        onMouseEnter={(e) => {
+          if (connecting) return;
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.background = 'rgba(255,255,255,0.045)';
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.background = available ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.015)';
+          e.currentTarget.style.borderColor = available ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.06)';
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: 'rgba(0,0,0,0.35)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          {icon ? (
+            <img src={icon} alt={`${title} icon`} style={{ width: 28, height: 28, objectFit: 'contain' }} />
+          ) : (
+            <span style={{ fontWeight: 700 }}>{title[0]}</span>
+          )}
+        </div>
 
-    return (
-      <AnimatePresence>
-        {showWalletModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
             style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px',
-              background: 'rgba(8, 8, 16, 0.9)',
-              backdropFilter: 'blur(20px)',
+              fontFamily: "'Sora', 'Inter', sans-serif",
+              fontWeight: 650,
+              fontSize: 14.5,
+              letterSpacing: '-0.01em',
+              lineHeight: 1.2,
             }}
-            onClick={() => setShowWalletModal(false)}
           >
-            <motion.div
-              onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              style={{
-                width: '100%',
-                maxWidth: '380px',
-                background: 'linear-gradient(165deg, rgba(14, 14, 24, 0.95), rgba(10, 10, 18, 0.98))',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-                borderRadius: '18px',
-                overflow: 'hidden',
-                boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.6)',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '1px',
-                background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent)',
-              }} />
+            {title}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Sora', 'Inter', sans-serif",
+              fontSize: 12.5,
+              color: 'rgba(255,255,255,0.55)',
+              marginTop: 4,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {subtitle}
+          </div>
+        </div>
 
-              <div style={{ padding: '1.75rem' }}>
-                {/* Header */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '2rem',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <SolanaLogo />
-                    <div>
-                      <h2 style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.9rem',
-                        fontWeight: 500,
-                        color: 'rgba(255, 255, 255, 0.6)',
-                        margin: 0,
-                        letterSpacing: '0.02em',
-                      }}>
-                        connect wallet
-                      </h2>
-                      <p style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.65rem',
-                        color: 'rgba(255, 255, 255, 0.3)',
-                        margin: '0.25rem 0 0',
-                      }}>
-                        select your wallet
-                      </p>
-                    </div>
-                  </div>
-                  <motion.button
-                    onClick={() => setShowWalletModal(false)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'rgba(255, 255, 255, 0.4)',
-                      fontSize: '1rem',
-                    }}
-                  >
-                    ×
-                  </motion.button>
-                </div>
-
-                {/* Wallet Options */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {[
-                    { name: 'Phantom', available: phantomAvailable, icon: walletMeta.phantom?.adapter?.icon },
-                    { name: 'Solflare', available: solflareAvailable, icon: walletMeta.solflare?.adapter?.icon },
-                  ].map((w) => (
-                    <motion.button
-                      key={w.name}
-                      onClick={() => w.available ? connectToWallet(w.name.toLowerCase()) : redirectToWalletExtension(w.name.toLowerCase())}
-                      disabled={connecting}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.85rem',
-                        padding: '0.9rem 1rem',
-                        background: 'rgba(255, 255, 255, 0.015)',
-                        border: '1px solid rgba(255, 255, 255, 0.04)',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                    >
-                      <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '10px',
-                        background: 'rgba(255, 255, 255, 0.02)',
-                        border: '1px solid rgba(255, 255, 255, 0.04)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
-                      }}>
-                        {w.icon ? (
-                          <img src={w.icon} alt={w.name} style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
-                        ) : (
-                          <span style={{
-                            fontFamily: "'JetBrains Mono', monospace",
-                            fontSize: '0.8rem',
-                            fontWeight: 500,
-                            color: 'rgba(255, 255, 255, 0.4)',
-                          }}>
-                            {w.name[0]}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          color: 'rgba(255, 255, 255, 0.55)',
-                        }}>
-                          {w.name}
-                        </div>
-                        <div style={{
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: '0.6rem',
-                          color: 'rgba(255, 255, 255, 0.3)',
-                          marginTop: '0.15rem',
-                        }}>
-                          {w.available ? 'installed' : 'install'}
-                        </div>
-                      </div>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: w.available ? 'rgba(130, 255, 180, 0.5)' : 'rgba(255, 255, 255, 0.15)',
-                      }} />
-                    </motion.button>
-                  ))}
-                </div>
-
-                {/* Error State */}
-                {(connectError || (!phantomAvailable && !solflareAvailable)) && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      marginTop: '0.85rem',
-                      padding: '0.75rem 1rem',
-                      background: 'rgba(255, 100, 100, 0.05)',
-                      border: '1px solid rgba(255, 100, 100, 0.1)',
-                      borderRadius: '10px',
-                    }}
-                  >
-                    <p style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: '0.65rem',
-                      color: 'rgba(255, 255, 255, 0.45)',
-                      margin: 0,
-                    }}>
-                      {connectError || 'no supported wallet detected'}
-                    </p>
-                  </motion.div>
-                )}
-
-                {/* Connecting State */}
-                {connecting && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      marginTop: '0.85rem',
-                      padding: '0.75rem 1rem',
-                      background: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.04)',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                    }}
-                  >
-                    <div style={{
-                      width: '14px',
-                      height: '14px',
-                      borderRadius: '50%',
-                      border: '2px solid rgba(255, 255, 255, 0.1)',
-                      borderTopColor: 'rgba(255, 255, 255, 0.5)',
-                      animation: 'spin 0.8s linear infinite',
-                    }} />
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: '0.7rem',
-                      color: 'rgba(255, 255, 255, 0.4)',
-                    }}>
-                      connecting...
-                    </span>
-                  </motion.div>
-                )}
-              </div>
-
-              <style>{`
-                @keyframes spin { to { transform: rotate(360deg); } }
-              `}</style>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <div
+          aria-hidden="true"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: 999,
+            background: available ? 'rgba(0,255,136,0.9)' : 'rgba(255,255,255,0.18)',
+            boxShadow: available ? '0 0 18px rgba(0,255,136,0.35)' : 'none',
+          }}
+        />
+      </button>
     );
+
+    if (premiumModal) {
+      return (
+        <AnimatePresence>
+          {showWalletModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px',
+                background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(18px)'
+              }}
+              onClick={() => setShowWalletModal(false)}
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+                style={{
+                  width: '100%', maxWidth: 440, borderRadius: 20, padding: 18,
+                  background: 'linear-gradient(180deg, rgba(12,12,18,0.92), rgba(8,8,14,0.88))',
+                  border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.65)', position: 'relative', overflow: 'hidden'
+                }}
+              >
+                <div aria-hidden="true" style={{ position: 'absolute', inset: -2, background:
+                  'radial-gradient(800px 260px at 20% -10%, rgba(123,92,246,0.28), transparent 60%), radial-gradient(600px 220px at 90% 10%, rgba(0,240,255,0.18), transparent 55%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{
+                  fontFamily: "'Archivo','Inter',sans-serif",
+                  fontWeight: 650,
+                  fontSize: 18,
+                  letterSpacing: '-0.02em',
+                  color: 'rgba(255,255,255,0.93)',
+                }}>
+                  Connect
+                </div>
+                <div style={{
+                  marginTop: 4,
+                  fontFamily: "'Sora','Inter',sans-serif",
+                  fontSize: 13,
+                  color: 'rgba(255,255,255,0.55)',
+                }}>
+                  Choose a wallet. One click.
+                </div>
+              </div>
+              <button
+                onClick={() => setShowWalletModal(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 10,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: 'rgba(255,255,255,0.7)',
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <WalletOption
+                id="phantom"
+                title="Phantom"
+                available={phantomAvailable}
+                icon={walletMeta.phantom?.adapter?.icon}
+                subtitle={phantomAvailable ? 'Installed' : 'Install Phantom'}
+                onClick={() => (phantomAvailable ? connectToWallet('phantom') : redirectToWalletExtension('phantom'))}
+              />
+              <WalletOption
+                id="solflare"
+                title="Solflare"
+                available={solflareAvailable}
+                icon={walletMeta.solflare?.adapter?.icon}
+                subtitle={solflareAvailable ? 'Installed' : 'Install Solflare'}
+                onClick={() => (solflareAvailable ? connectToWallet('solflare') : redirectToWalletExtension('solflare'))}
+              />
+
+              {(connectError || (!phantomAvailable && !solflareAvailable)) && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: 'rgba(255,71,87,0.08)',
+                    border: '1px solid rgba(255,71,87,0.18)',
+                    color: 'rgba(255,255,255,0.82)',
+                    fontFamily: "'Sora','Inter',sans-serif",
+                    fontSize: 12.8,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {connectError || 'No supported wallet detected in this browser.'}
+                </div>
+              )}
+
+              {connecting && (
+                <div
+                  style={{
+                    marginTop: 6,
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    color: 'rgba(255,255,255,0.7)',
+                    fontFamily: "'Sora','Inter',sans-serif",
+                    fontSize: 12.8,
+                  }}
+                >
+                  <div style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: 999,
+                    border: '2px solid rgba(255,255,255,0.20)',
+                    borderTopColor: 'rgba(255,255,255,0.85)',
+                    animation: 'spin 700ms linear infinite',
+                  }} />
+                  Connecting…
+                </div>
+              )}
+            </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      );
+    }
+
+    // Fallback to original non-motion modal if premium is disabled
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '18px',
+          background: 'rgba(0,0,0,0.72)',
+          backdropFilter: 'blur(18px)',
+          animation: 'fadeIn 180ms ease-out',
+        }}
+        onClick={() => setShowWalletModal(false)}
+      >
+        <style>{`
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
+
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '100%',
+            maxWidth: 420,
+            borderRadius: 18,
+            padding: 18,
+            background: 'linear-gradient(180deg, rgba(12,12,18,0.92), rgba(8,8,14,0.88))',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.65)',
+            animation: 'cardIn 220ms cubic-bezier(.2,.9,.2,1)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: -2,
+              background:
+                'radial-gradient(800px 260px at 20% -10%, rgba(123,92,246,0.28), transparent 60%), radial-gradient(600px 220px at 90% 10%, rgba(0,240,255,0.18), transparent 55%)',
+              pointerEvents: 'none',
+            }}
+          />
+
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{
+                  fontFamily: "'Archivo','Inter',sans-serif",
+                  fontWeight: 650,
+                  fontSize: 18,
+                  letterSpacing: '-0.02em',
+                  color: 'rgba(255,255,255,0.93)',
+                }}>
+                  Connect
+                </div>
+                <div style={{
+                  marginTop: 4,
+                  fontFamily: "'Sora','Inter',sans-serif",
+                  fontSize: 13,
+                  color: 'rgba(255,255,255,0.55)',
+                }}>
+                  Choose a wallet. One click.
+                </div>
+              </div>
+              <button
+                onClick={() => setShowWalletModal(false)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 10,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: 'rgba(255,255,255,0.7)',
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <WalletOption
+                id="phantom"
+                title="Phantom"
+                available={phantomAvailable}
+                icon={walletMeta.phantom?.adapter?.icon}
+                subtitle={phantomAvailable ? 'Installed' : 'Install Phantom'}
+                onClick={() => (phantomAvailable ? connectToWallet('phantom') : redirectToWalletExtension('phantom'))}
+              />
+              <WalletOption
+                id="solflare"
+                title="Solflare"
+                available={solflareAvailable}
+                icon={walletMeta.solflare?.adapter?.icon}
+                subtitle={solflareAvailable ? 'Installed' : 'Install Solflare'}
+                onClick={() => (solflareAvailable ? connectToWallet('solflare') : redirectToWalletExtension('solflare'))}
+              />
+
+              {(connectError || (!phantomAvailable && !solflareAvailable)) && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: 'rgba(255,71,87,0.08)',
+                    border: '1px solid rgba(255,71,87,0.18)',
+                    color: 'rgba(255,255,255,0.82)',
+                    fontFamily: "'Sora','Inter',sans-serif",
+                    fontSize: 12.8,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {connectError || 'No supported wallet detected in this browser.'}
+                </div>
+              )}
+
+              {connecting && (
+                <div
+                  style={{
+                    marginTop: 6,
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    color: 'rgba(255,255,255,0.7)',
+                    fontFamily: "'Sora','Inter',sans-serif",
+                    fontSize: 12.8,
+                  }}
+                >
+                  <div style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: 999,
+                    border: '2px solid rgba(255,255,255,0.20)',
+                    borderTopColor: 'rgba(255,255,255,0.85)',
+                    animation: 'spin 700ms linear infinite',
+                  }} />
+                  Connecting…
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
   };
 
   // Connect once the selected wallet is actually applied.
@@ -474,6 +612,14 @@ const WalletCard = memo(function WalletCard() {
                 position: 'relative',
                 overflow: 'hidden'
               }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 8px 25px rgba(123, 92, 246, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 20px rgba(123, 92, 246, 0.4)';
+              }}
             >
               {connecting ? (
                 'Connecting...'
@@ -500,6 +646,14 @@ const WalletCard = memo(function WalletCard() {
                 boxShadow: '0 4px 20px rgba(255, 71, 87, 0.4)',
                 position: 'relative',
                 overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 8px 25px rgba(255, 71, 87, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 20px rgba(255, 71, 87, 0.4)';
               }}
             >
               {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}

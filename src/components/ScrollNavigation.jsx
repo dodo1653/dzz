@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, memo } from 'react';
+import React, { useRef, useState, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
 
@@ -34,18 +34,6 @@ const GlassDot = memo(function GlassDot({ isActive, onClick, label }) {
         transform: isHovered ? 'scale(1.15)' : 'scale(1)',
       }}
     >
-      {isActive && (
-        <motion.div
-          layoutId="activeIndicator"
-          style={{
-            position: 'absolute',
-            inset: '2px',
-            borderRadius: '5px',
-            background: 'linear-gradient(90deg, rgba(74, 222, 128, 0.7) 0%, rgba(74, 222, 128, 0.3) 100%)',
-          }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        />
-      )}
       {isHovered && label && (
         <motion.span
           initial={{ opacity: 0, x: 10, scale: 0.9 }}
@@ -123,7 +111,7 @@ const ScrollNavigationDots = memo(function ScrollNavigationDots({ sections, acti
 
 const icons = {
   radar: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="12" r="10" />
       <path d="M12 2a10 10 0 0 1 10 10" />
       <path d="M12 6a6 6 0 0 1 6 6" />
@@ -131,151 +119,108 @@ const icons = {
     </svg>
   ),
   shield: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
       <path d="M9 12l2 2 4-4" strokeWidth="2" />
     </svg>
   ),
   pulse: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
   ),
   rocket: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
       <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
   ),
   brain: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="12" r="3" />
       <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
     </svg>
   ),
   chart: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <polyline points="7 14 10 10 13 13 17 8" />
     </svg>
   ),
 };
 
-const FeatureCard = memo(function FeatureCard({ feature, index }) {
+const FeatureCard = memo(function FeatureCard({ feature }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const cardRef = useRef(null);
-  
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rotateX = (e.clientY - centerY) / 20;
-    const rotateY = (e.clientX - centerX) / 20;
-    setRotation({ x: -rotateX, y: rotateY });
-  };
-  
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setRotation({ x: 0, y: 0 });
-  };
   
   return (
     <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      animate={{ 
-        scale: isHovered ? 1.03 : 1,
-      }}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ scale: 1.03, y: -4 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       style={{
         flexShrink: 0,
-        width: '300px',
-        padding: '1.5rem',
+        width: '280px',
+        padding: '1.25rem',
         background: isHovered 
-          ? 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)'
-          : 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+          ? 'rgba(255, 255, 255, 0.04)'
+          : 'rgba(255, 255, 255, 0.015)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: '20px',
+        borderRadius: '16px',
         border: isHovered 
-          ? '1px solid rgba(255,255,255,0.15)' 
-          : '1px solid rgba(255,255,255,0.06)',
+          ? '1px solid rgba(255, 255, 255, 0.1)' 
+          : '1px solid rgba(255, 255, 255, 0.04)',
         boxShadow: isHovered 
-          ? `0 25px 50px -15px rgba(0,0,0,0.5), 0 0 40px -10px ${feature.accent}`
-          : '0 10px 30px -15px rgba(0,0,0,0.3)',
+          ? `0 20px 40px -15px rgba(0,0,0, 0.5), 0 0 30px -10px ${feature.accent}`
+          : '0 10px 30px -15px rgba(0,0,0, 0.3)',
         cursor: 'pointer',
-        transformStyle: 'preserve-3d',
-        transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-        transition: 'transform 0.1s ease-out',
       }}
     >
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '1rem',
+        gap: '0.85rem',
         marginBottom: '0.75rem',
       }}>
-        <div style={{
-          width: '44px',
-          height: '44px',
-          borderRadius: '12px',
-          background: feature.gradient,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'rgba(255, 255, 255, 0.95)',
-          boxShadow: `0 8px 20px ${feature.accent}`,
-        }}>
+        <motion.div
+          animate={isHovered ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '12px',
+            background: feature.gradient,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(255, 255, 255, 0.9)',
+            boxShadow: `0 6px 15px ${feature.accent}`,
+          }}
+        >
           {icons[feature.icon]}
-        </div>
+        </motion.div>
         <h3 style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontSize: '1rem',
-          fontWeight: 600,
-          color: 'rgba(255, 255, 255, 0.95)',
-          letterSpacing: '-0.01em',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '0.85rem',
+          fontWeight: 500,
+          color: isHovered ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+          letterSpacing: '0.01em',
           margin: 0,
+          textTransform: 'lowercase',
         }}>
           {feature.title}
         </h3>
       </div>
       <p style={{
         fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.8rem',
-        color: 'rgba(255, 255, 255, 0.5)',
+        fontSize: '0.75rem',
+        color: 'rgba(255, 255, 255, 0.35)',
         lineHeight: 1.6,
         margin: 0,
       }}>
         {feature.description}
       </p>
-      {isHovered && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            marginTop: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-        >
-          <span style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.7rem',
-            fontWeight: 500,
-            color: 'rgba(123, 92, 246, 0.9)',
-            letterSpacing: '0.05em',
-          }}>
-            AI-POWERED
-          </span>
-        </motion.div>
-      )}
     </motion.div>
   );
 });
@@ -285,34 +230,15 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
   const isInView = useInView(ref, { amount: 0.2, once: false });
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [scrollPosition, setScrollPosition] = useState(0);
   
-  useEffect(() => {
-    if (reducedMotion || isMobile) return;
-    
-    let animationId;
-    let startTime = Date.now();
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const position = (elapsed / 40) % (features.length * 340);
-      setScrollPosition(position);
-      animationId = requestAnimationFrame(animate);
-    };
-    
-    animationId = requestAnimationFrame(animate);
-    
-    return () => cancelAnimationFrame(animationId);
-  }, [reducedMotion, isMobile, features.length]);
-  
-  const allFeatures = [...features, ...features];
+  const allFeatures = [...features, ...features, ...features];
   
   return (
     <section
       id="features"
       ref={ref}
       style={{
-        padding: isMobile ? '4rem 1.5rem' : '5rem 2rem',
+        padding: isMobile ? '4rem 0' : '5rem 0',
         maxWidth: '100%',
         margin: '0 auto',
         overflow: 'hidden',
@@ -328,31 +254,27 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
           maxWidth: '1100px',
           marginLeft: 'auto',
           marginRight: 'auto',
+          padding: isMobile ? '0 1.5rem' : '0 2rem',
         }}
       >
         <p style={{
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.75rem',
-          color: 'rgba(255, 255, 255, 0.4)',
-          letterSpacing: '0.2em',
+          fontSize: '0.65rem',
+          color: 'rgba(255, 255, 255, 0.35)',
+          letterSpacing: '0.15em',
           marginBottom: '1rem',
+          textTransform: 'lowercase',
         }}>
-          YOUR ARSENAL
+          your arsenal
         </p>
         <h2 style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.9)',
-          letterSpacing: '-0.02em',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 'clamp(1.4rem, 4vw, 1.9rem)',
+          fontWeight: 400,
+          color: 'rgba(255, 255, 255, 0.6)',
+          letterSpacing: '-0.01em',
         }}>
-          Every tool you need to{' '}
-          <span style={{
-            background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.95) 0%, rgba(0, 212, 255, 0.9) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}>dominate.</span>
+          every tool you need.
         </h2>
       </motion.div>
       
@@ -363,23 +285,61 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
         }}
       >
         <div
+          className="features-scroll-container"
           style={{
             display: 'flex',
-            gap: '1.25rem',
+            gap: '1rem',
             padding: isMobile ? '0 1.5rem' : '0 2rem',
-            transform: `translateX(-${scrollPosition}px)`,
-            transition: reducedMotion || isMobile ? 'none' : 'transform 0.1s linear',
+            width: 'max-content',
+            animation: reducedMotion || isMobile ? 'none' : 'scroll-features 25s linear infinite',
           }}
         >
           {allFeatures.map((feature, idx) => (
             <FeatureCard
               key={idx}
               feature={feature}
-              index={idx}
             />
           ))}
         </div>
+        
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: '150px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: '150px',
+            background: 'linear-gradient(-90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
+
+      <style>{`
+        @keyframes scroll-features {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-${features.length * 290}px);
+          }
+        }
+        
+        .features-scroll-container:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
     </section>
   );
 });
