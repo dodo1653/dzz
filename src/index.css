@@ -124,95 +124,21 @@ body {
 .fade-scroll {
   opacity: 0 !important;
   transform: translateY(40px) scale(0.98) !important;
+  filter: blur(10px) !important;
   visibility: visible !important; /* Keep in DOM but hidden */
-  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   /* Use hardware acceleration */
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
   pointer-events: none; /* Prevent interaction when hidden */
 }
 
 .fade-scroll--visible {
   opacity: 1 !important;
   transform: translateY(0) scale(1) !important;
+  filter: blur(0px) !important;
   pointer-events: auto !important; /* Re-enable interaction when visible */
-}
-
-/* Enhanced staggered animations for different elements */
-.fade-scroll:nth-child(1) { transition-delay: 0.05s; }
-.fade-scroll:nth-child(2) { transition-delay: 0.1s; }
-.fade-scroll:nth-child(3) { transition-delay: 0.15s; }
-.fade-scroll:nth-child(4) { transition-delay: 0.2s; }
-.fade-scroll:nth-child(5) { transition-delay: 0.25s; }
-.fade-scroll:nth-child(6) { transition-delay: 0.3s; }
-
-/* Ensure TypingText elements within fade-scroll elements are handled properly */
-.fade-scroll .typing-root {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.fade-scroll--visible .typing-root {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Enhanced animations for different content types */
-.fade-scroll h1, .fade-scroll h2, .fade-scroll h3 {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-}
-
-.fade-scroll--visible h1, .fade-scroll--visible h2, .fade-scroll--visible h3 {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-scroll p {
-  opacity: 0;
-  transform: translateY(25px);
-  transition: opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s;
-}
-
-.fade-scroll--visible p {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-scroll .wallet-card {
-  opacity: 0;
-  transform: translateY(35px);
-  transition: opacity 1s ease-out, transform 1s ease-out;
-}
-
-.fade-scroll--visible .wallet-card {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.fade-scroll .feature-card {
-  opacity: 0;
-  transform: translateY(30px) rotateX(15deg);
-  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
-}
-
-.fade-scroll--visible .feature-card {
-  opacity: 1;
-  transform: translateY(0) rotateX(0deg);
-}
-
-/* Smooth page transition for route changes */
-.page-transition {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.page-transition.mounted {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* Futuristic 2077-style enhancements */
@@ -327,55 +253,31 @@ html {
   transform: translateZ(0);
 }
 
-/* Optimized glass card - clean and crisp without blur */
+/* Optimized glass card - using more performant properties */
 .wallet-card{
   width: 100%;
   min-height: 280px;
-  background: linear-gradient(165deg, rgba(18, 18, 32, 0.95) 0%, rgba(10, 10, 20, 0.98) 100%);
+  background: rgba(255,255,255,0.03);
   border-radius: 28px;
   padding: 32px;
-  border: 1px solid rgba(123, 92, 246, 0.15);
-  box-shadow: 
-    0 0 0 1px rgba(123, 92, 246, 0.08),
-    0 24px 60px -12px rgba(0, 0, 0, 0.5),
-    0 12px 24px -8px rgba(123, 92, 246, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 80px rgba(6,10,20,0.7), 0 0 1px rgba(123,92,246,0.2);
+  /* More performant backdrop-filter */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: #e6f3ff;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Optimized transition using transform and opacity */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 24px;
-  position: relative;
-  overflow: hidden;
-}
-.wallet-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(123, 92, 246, 0.4), rgba(0, 212, 255, 0.3), transparent);
-  opacity: 0.6;
-}
-.wallet-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle at 0% 0%, rgba(123, 92, 246, 0.1) 0%, transparent 70%);
-  pointer-events: none;
+  /* Hardware acceleration */
+  will-change: transform, box-shadow;
 }
 .wallet-card:hover{
-  transform: translateY(-6px);
-  box-shadow: 
-    0 0 0 1px rgba(123, 92, 246, 0.15),
-    0 32px 80px -16px rgba(0, 0, 0, 0.6),
-    0 20px 40px -12px rgba(123, 92, 246, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-color: rgba(123, 92, 246, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 32px 100px rgba(0,160,255,0.12), 0 0 40px rgba(123,92,246,0.15);
+  border-color: rgba(123,92,246,0.2);
 }
 
 /* top row */
@@ -1014,151 +916,6 @@ button.wallet-adapter-button.wallet-adapter-button-trigger:active {
   }
 }
 
-/* ==========================================
-   WELCOME ANIMATIONS - Triggered on page load
-   ========================================== */
-
-/* Master welcome animation keyframes */
-@keyframes welcomeFadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(40px);
-    filter: blur(8px);
-  }
-  60% {
-    filter: blur(0px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0px);
-  }
-}
-
-@keyframes welcomeScaleIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes welcomeSlideInLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes welcomeSlideInRight {
-  0% {
-    opacity: 0;
-    transform: translateX(50px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes welcomeGlow {
-  0% {
-    opacity: 0;
-    filter: brightness(0.5);
-  }
-  50% {
-    filter: brightness(1.2);
-  }
-  100% {
-    opacity: 1;
-    filter: brightness(1);
-  }
-}
-
-/* Welcome animation classes */
-.welcome-animate {
-  animation: welcomeFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-.welcome-animate-scale {
-  animation: welcomeScaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-.welcome-animate-left {
-  animation: welcomeSlideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-.welcome-animate-right {
-  animation: welcomeSlideInRight 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-.welcome-animate-glow {
-  animation: welcomeGlow 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-/* Staggered delays for welcome animations */
-.welcome-delay-1 { animation-delay: 0.1s; }
-.welcome-delay-2 { animation-delay: 0.2s; }
-.welcome-delay-3 { animation-delay: 0.3s; }
-.welcome-delay-4 { animation-delay: 0.4s; }
-.welcome-delay-5 { animation-delay: 0.5s; }
-.welcome-delay-6 { animation-delay: 0.6s; }
-.welcome-delay-7 { animation-delay: 0.7s; }
-.welcome-delay-8 { animation-delay: 0.8s; }
-.welcome-delay-9 { animation-delay: 0.9s; }
-.welcome-delay-10 { animation-delay: 1s; }
-
-/* Auto-apply welcome animations to common elements on page load */
-body.welcome-loaded h1 {
-  animation: welcomeFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-  opacity: 0;
-}
-
-body.welcome-loaded h2 {
-  animation: welcomeFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-  opacity: 0;
-}
-
-body.welcome-loaded .wallet-card {
-  animation: welcomeScaleIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-  opacity: 0;
-}
-
-body.welcome-loaded .feature-card {
-  animation: welcomeFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-body.welcome-loaded .feature-card:nth-child(1) { animation-delay: 0.4s; }
-body.welcome-loaded .feature-card:nth-child(2) { animation-delay: 0.5s; }
-body.welcome-loaded .feature-card:nth-child(3) { animation-delay: 0.6s; }
-body.welcome-loaded .feature-card:nth-child(4) { animation-delay: 0.7s; }
-body.welcome-loaded .feature-card:nth-child(5) { animation-delay: 0.8s; }
-body.welcome-loaded .feature-card:nth-child(6) { animation-delay: 0.9s; }
-
-body.welcome-loaded nav,
-body.welcome-loaded .navigation {
-  animation: welcomeFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0s forwards;
-  opacity: 0;
-}
-
-body.welcome-loaded footer {
-  animation: welcomeFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
-  opacity: 0;
-}
-
 @layer utilities {
   .animate-fadeIn {
     animation: fadeIn 1.5s ease-out forwards;
@@ -1193,11 +950,6 @@ body.welcome-loaded footer {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  /* Verance-style smooth easing */
-  .verance-transition {
-    transition: all 0.4s cubic-bezier(0.2, 0.0, 0.2, 1);
-  }
-
   /* Utility for content that should be optimized for performance */
   .perf-optimized {
     -webkit-transform: translateZ(0);
@@ -1206,27 +958,5 @@ body.welcome-loaded footer {
     -o-transform: translateZ(0);
     transform: translateZ(0);
     will-change: auto;
-  }
-
-  /* Glass morphism utilities */
-  .glass-light {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-
-  /* Glow effects */
-  .glow-purple {
-    box-shadow: 0 0 20px rgba(123, 92, 246, 0.5), 0 0 40px rgba(123, 92, 246, 0.3);
-  }
-
-  .glow-blue {
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 212, 255, 0.3);
   }
 }

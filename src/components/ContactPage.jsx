@@ -1,267 +1,124 @@
-import React, { useEffect, useRef } from 'react';
-// Inline fallback for MotionSection to avoid missing file errors
-const MotionSection = ({ as, children, ...rest }) => {
-  const Tag = as || 'section';
-  return <Tag {...rest}>{children}</Tag>;
-};
+import React, { memo } from 'react';
+import { motion } from 'framer-motion';
+import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
 
-const ContactPage = () => {
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
+const ContactPage = memo(function ContactPage() {
+  const reducedMotion = useReducedMotion();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
-  // Discord SVG Icon Component
-  const DiscordIcon = ({ size = 24, color = 'currentColor' }) => (
+  const DiscordIcon = ({ size = 24 }) => (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill={color}
+      fill="#5865F2"
       style={{ display: 'inline-block', verticalAlign: 'middle' }}
     >
-      <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-.99 0-1.8-.9-1.8-2.02c0-1.11.78-2.03 1.8-2.03c1.01 0 1.8.92 1.8 2.03c0 1.12-.79 2.02-1.8 2.02zm6.97 0c-.99 0-1.8-.9-1.8-2.02c0-1.11.78-2.03 1.8-2.03c1.01 0 1.8.92 1.8 2.03c0 1.12-.79 2.02-1.8 2.02z"/>
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
     </svg>
   );
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-
-    // Particle system for antigravity effect
-    const particles = [];
-    const particleCount = 80;
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-        this.color = `rgba(${Math.floor(Math.random() * 123 + 132)}, ${Math.floor(Math.random() * 92 + 164)}, ${Math.floor(Math.random() * 246 + 9)}, ${Math.random() * 0.5 + 0.1})`;
-        this.originalSize = this.size;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        // Bounce off edges
-        if (this.x <= 0 || this.x >= width) this.speedX *= -1;
-        if (this.y <= 0 || this.y >= height) this.speedY *= -1;
-
-        // Pulsing effect
-        this.size = this.originalSize + Math.sin(Date.now() * 0.001 + this.x * 0.01) * 0.5;
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-      }
-    }
-
-    // Create particles
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-
-    // Draw connecting lines between close particles
-    const drawConnections = () => {
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(123, 92, 246, ${0.2 * (1 - distance / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw subtle gradient background
-      const gradient = ctx.createRadialGradient(
-        width / 2,
-        height / 2,
-        0,
-        width / 2,
-        height / 2,
-        Math.max(width, height) * 0.8
-      );
-      gradient.addColorStop(0, 'rgba(2, 3, 10, 0.3)');
-      gradient.addColorStop(1, 'rgba(2, 3, 10, 0.8)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-
-      // Update and draw particles
-      particles.forEach(particle => {
-        particle.update();
-        particle.draw();
-      });
-
-      // Draw connections
-      drawConnections();
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
-      {/* Antigravity background canvas */}
-      <canvas
-        ref={canvasRef}
+    <div style={{ 
+      position: 'relative', 
+      minHeight: '100vh', 
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: isMobile ? '6rem 1.5rem 2rem' : '8rem 2rem 2rem',
+    }}>
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 1,
-          pointerEvents: 'none',
+          textAlign: 'center',
+          marginBottom: '3rem',
         }}
-      />
-
-      {/* Content overlay */}
-      <MotionSection as="div" style={{
-        padding: '4rem 2rem',
-        maxWidth: '800px',
-        margin: '0 auto',
-        textAlign: 'center',
-        position: 'relative',
-        zIndex: 2,
-      }}>
-        <div style={{
-          fontFamily: "'Archivo', 'Inter', sans-serif",
-          fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+      >
+        <p style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '0.7rem',
+          color: 'rgba(255, 255, 255, 0.4)',
+          letterSpacing: '0.2em',
+          marginBottom: '1rem',
+        }}>
+          COMMUNITY
+        </p>
+        <h1 style={{
+          fontFamily: "'Archivo', sans-serif",
+          fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
           fontWeight: 500,
-          background: 'linear-gradient(135deg, rgba(220,215,255,0.95) 0%, rgba(180,200,255,0.85) 50%, rgba(160,220,255,0.9) 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '2rem',
-          letterSpacing: '-0.03em',
-          filter: 'drop-shadow(0 0 25px rgba(200,215,255,0.3)) drop-shadow(0 0 50px rgba(180,200,255,0.2))'
+          color: 'rgba(255, 255, 255, 0.9)',
+          letterSpacing: '-0.02em',
+          marginBottom: '0.75rem',
         }}>
           Join Our Community
-        </div>
-        <div style={{
-          color: 'rgba(255,255,255,0.8)',
-          fontSize: '1.1rem',
-          fontFamily: "'Sora', sans-serif",
-          lineHeight: '1.7',
-          marginBottom: '3rem'
+        </h1>
+        <p style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '0.8rem',
+          color: 'rgba(255, 255, 255, 0.45)',
+          maxWidth: '480px',
+          margin: '0 auto',
+          lineHeight: 1.6,
         }}>
-          Connect with fellow traders and get real-time updates in our Discord community.
-        </div>
+          Connect with fellow traders and get real-time updates.
+        </p>
+      </motion.div>
 
-        {/* Discord-focused section */}
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 30 }}
+        animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          border: '1px solid rgba(255, 255, 255, 0.04)',
+          background: 'rgba(255, 255, 255, 0.02)',
+          backdropFilter: 'blur(40px)',
+          WebkitBackdropFilter: 'blur(40px)',
+        }}
+      >
         <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2rem',
-          marginBottom: '3rem'
+          padding: '2.5rem 2rem',
+          textAlign: 'center',
         }}>
-          {/* Discord Server Preview */}
           <div style={{
-            width: '100%',
-            maxWidth: '500px',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            border: '1px solid rgba(123, 92, 246, 0.3)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            background: 'linear-gradient(135deg, rgba(10, 5, 30, 0.9), rgba(5, 2, 20, 0.95))',
-            padding: '2rem',
-            textAlign: 'center',
-          }}>
-            <DiscordIcon size={64} color="#7289da" />
-            <div style={{
-              marginTop: '1rem',
-              fontSize: '1.2rem',
-              fontWeight: 'bold',
-              color: 'rgba(255,255,255,0.95)',
-              fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-            }}>
-              Join Our Discord Server
-            </div>
-            <div style={{
-              marginTop: '0.5rem',
-              fontSize: '0.9rem',
-              color: 'rgba(255,255,255,0.7)',
-              fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-            }}>
-              Connect with the community
-            </div>
-          </div>
-          
-          <div style={{
+            width: '60px',
+            height: '60px',
+            margin: '0 auto 1.25rem',
+            borderRadius: '16px',
+            background: 'rgba(88, 101, 242, 0.1)',
+            border: '1px solid rgba(88, 101, 242, 0.2)',
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem',
-            padding: '2rem',
-            background: 'linear-gradient(135deg, rgba(10, 5, 30, 0.85), rgba(5, 2, 20, 0.95))',
-            border: '1px solid rgba(123, 92, 246, 0.3)',
-            borderRadius: '20px',
-            backdropFilter: 'blur(20px)',
-            width: '100%',
-            maxWidth: '500px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            justifyContent: 'center',
+            color: 'rgba(255, 255, 255, 0.5)',
           }}>
-            <DiscordIcon size={48} color="#7289da" />
-            <div style={{ textAlign: 'left' }}>
-              <div style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: 'white',
-                marginBottom: '0.5rem',
-                fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-              }}>
-                Discord Community
-              </div>
-              <div style={{
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: '1rem',
-                fontFamily: "'Space Grotesk', 'Sora', sans-serif",
-              }}>
-                Join for live discussions and alpha
-              </div>
-            </div>
+            <DiscordIcon size={28} />
           </div>
-
+          <h2 style={{
+            fontFamily: "'Archivo', sans-serif",
+            fontSize: '1.1rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.85)',
+            marginBottom: '0.5rem',
+          }}>
+            Join Our Discord Server
+          </h2>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.75rem',
+            color: 'rgba(255, 255, 255, 0.4)',
+            marginBottom: '1.5rem',
+          }}>
+            Connect with the community
+          </p>
           <a
             href="https://discord.gg/Y3uh3hN2"
             target="_blank"
@@ -269,79 +126,83 @@ const ContactPage = () => {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              padding: '1rem 2rem',
-              background: 'linear-gradient(135deg, #7289da, #5865F2)',
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              fontFamily: "'Sora', sans-serif",
+              justifyContent: 'center',
+              gap: '0.5rem',
+              width: '100%',
+              padding: '0.85rem 1.5rem',
+              background: 'rgba(88, 101, 242, 0.1)',
+              color: 'rgba(255, 255, 255, 0.85)',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              fontFamily: "'JetBrains Mono', monospace",
               textDecoration: 'none',
               borderRadius: '12px',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 8px 24px rgba(114, 137, 218, 0.3)',
+              border: '1px solid rgba(88, 101, 242, 0.2)',
+              transition: 'all 0.25s ease',
             }}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-3px)';
-              e.target.style.boxShadow = '0 12px 30px rgba(114, 137, 218, 0.4)';
+              e.currentTarget.style.background = 'rgba(88, 101, 242, 0.2)';
+              e.currentTarget.style.borderColor = 'rgba(88, 101, 242, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 8px 24px rgba(114, 137, 218, 0.3)';
+              e.currentTarget.style.background = 'rgba(88, 101, 242, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(88, 101, 242, 0.2)';
             }}
           >
-            <DiscordIcon size={24} color="white" />
+            <DiscordIcon size={16} />
             Join Discord
           </a>
         </div>
+      </motion.div>
 
-        {/* Additional contact options */}
-        <div style={{
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1.5rem',
-          marginTop: '2rem'
-        }}>
-          <div style={{
-            padding: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px'
-          }}>
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+          gap: '1rem',
+          marginTop: '2rem',
+          width: '100%',
+          maxWidth: '420px',
+        }}
+      >
+        {[
+          { label: 'SUPPORT', value: 'support@dzz.ai' },
+          { label: 'BUSINESS', value: 'business@dzz.ai' },
+        ].map((item, i) => (
+          <div
+            key={i}
+            style={{
+              padding: '1.25rem',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.04)',
+              borderRadius: '14px',
+            }}
+          >
             <div style={{
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.65rem',
+              fontWeight: 500,
+              color: 'rgba(255, 255, 255, 0.35)',
+              letterSpacing: '0.1em',
               marginBottom: '0.5rem',
-              color: 'white'
             }}>
-              Support
+              {item.label}
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.7)' }}>
-              support@degenradar.ai
+            <div style={{ 
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.55)',
+            }}>
+              {item.value}
             </div>
           </div>
-          <div style={{
-            padding: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px'
-          }}>
-            <div style={{
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
-              marginBottom: '0.5rem',
-              color: 'white'
-            }}>
-              Business
-            </div>
-            <div style={{ color: 'rgba(255,255,255,0.7)' }}>
-              business@degenradar.ai
-            </div>
-          </div>
-        </div>
-      </MotionSection>
+        ))}
+      </motion.div>
     </div>
   );
-};
+});
 
 export default ContactPage;

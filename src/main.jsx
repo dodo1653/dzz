@@ -8,7 +8,7 @@ import "./index.css";
 import { Buffer } from "buffer";
 window.Buffer = Buffer;
 
-// Wallet provider (we wrap inside WalletCard so App stays simple)
+// Root render with React Router
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>

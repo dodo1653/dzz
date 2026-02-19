@@ -1,274 +1,61 @@
-.fade-scroll {
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 0.8s cubic-bezier(0.2, 0.0, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.0, 0.2, 1);
-}
-
-.fade-scroll.fade-scroll--visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Feature card specific animations - initial state */
-.feature-card {
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 0.8s cubic-bezier(0.2, 0.0, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.0, 0.2, 1);
-}
-
-.feature-card.feature-animated {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Add staggered delay for elements in the same container */
-.fade-scroll:nth-child(1) { transition-delay: 0.05s; }
-.fade-scroll:nth-child(2) { transition-delay: 0.1s; }
-.fade-scroll:nth-child(3) { transition-delay: 0.15s; }
-.fade-scroll:nth-child(4) { transition-delay: 0.2s; }
-.fade-scroll:nth-child(5) { transition-delay: 0.25s; }
-.fade-scroll:nth-child(6) { transition-delay: 0.3s; }
-.fade-scroll:nth-child(7) { transition-delay: 0.35s; }
-.fade-scroll:nth-child(8) { transition-delay: 0.4s; }
-.fade-scroll:nth-child(9) { transition-delay: 0.45s; }
-.fade-scroll:nth-child(10) { transition-delay: 0.5s; }
-
-/* Hero Section Styles */
-.hero-section {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-}
-
-.hero-content-wrapper {
-  width: 100%;
-  max-width: 48rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.hero-title {
-  font-family: 'Archivo', 'Inter', sans-serif;
-  font-size: clamp(2.75rem, 6vw, 4.5rem);
-  font-weight: 500;
-  line-height: 1.1;
-  margin-bottom: 2rem;
-  background: linear-gradient(135deg, rgba(220,215,255,0.95) 0%, rgba(180,200,255,0.85) 50%, rgba(160,220,255,0.9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 2px 10px rgba(123,92,246,0.3)) drop-shadow(0 0 40px rgba(180,200,255,0.2));
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
-}
-
-.hero-typing-text-container {
-  font-size: 1.1rem;
-  color: #ffffff;
-  font-family: 'Space Grotesk', 'Sora', sans-serif;
-  font-weight: 300;
-  letter-spacing: 0.03em;
-  line-height: 1.7;
-  filter: drop-shadow(0 0 50px rgba(255,255,255,0.6)) drop-shadow(0 0 100px rgba(123,92,246,0.7)) drop-shadow(0 0 150px rgba(0,240,255,0.4));
-}
-
-.hero-wallet-card-container {
-  width: 100%;
-  max-width: 540px;
-  margin-bottom: 2rem;
-}
-
-.hero-tagline {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.875rem;
-  font-family: 'Sora', 'Inter', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-align: center;
-  margin-top: 1rem;
-}
-
-/* Pricing Section Styles */
-.pricing-section {
-  padding: 4rem 2rem 6rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.pricing-header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.pricing-title {
-  font-family: 'Archivo', 'Inter', sans-serif;
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  font-weight: 500;
-  background: linear-gradient(135deg, rgba(220,215,255,0.95) 0%, rgba(180,200,255,0.85) 50%, rgba(160,220,255,0.9) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 1.5rem;
-  letter-spacing: -0.03em;
-  filter: drop-shadow(0 2px 10px rgba(123,92,246,0.3)) drop-shadow(0 0 40px rgba(180,200,255,0.2));
-}
-
-.pricing-description {
-  font-family: 'Space Grotesk', 'Sora', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 300;
-  color: #ffffff;
-  max-width: 600px;
-  margin: 0 auto;
-  letter-spacing: 0.02em;
-  line-height: 1.7;
-  filter: drop-shadow(0 0 40px rgba(255,255,255,0.45)) drop-shadow(0 0 80px rgba(123,92,246,0.5)) drop-shadow(0 0 120px rgba(0,240,255,0.25));
-}
-
-.pricing-card-container {
-  max-width: 380px;
-  margin: 0 auto;
-}
-
-.pricing-card {
-  width: 100%;
-  background: rgba(255,255,255,0.015);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 20px;
-  padding: 1.8rem;
-  backdrop-filter: blur(10px);
-}
-
-.pricing-badge-container {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.pricing-badge {
-  display: inline-block;
-  padding: 0.4rem 1.2rem;
-  background: linear-gradient(135deg, #ff6b00, #ff8e00);
-  color: white;
-  font-family: 'Space Grotesk', 'Sora', sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  border-radius: 20px;
-}
-
-.pricing-card-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #f0f4ff;
-  font-family: 'Space Grotesk', 'Sora', sans-serif;
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.pricing-card-price-container {
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.pricing-card-price {
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 3.5rem;
-  font-weight: 300;
-  color: #ffffff;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-
-.pricing-card-price-unit {
-  font-size: 2.5rem;
-}
-
-.pricing-card-period {
-  font-family: 'Inter', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 300;
-  color: rgba(255,255,255,0.7);
-}
-
-.pricing-card-features {
-  list-style: none;
-  padding: 0;
-  margin-bottom: 2rem;
-}
-
-.pricing-card-feature-item {
-  font-family: 'Sora', 'Inter', sans-serif;
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: 0.8rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.pricing-card-feature-checkmark {
-  color: #00f088;
-  font-size: 1.2rem;
-}
-
-.pricing-card-button {
-  width: 100%;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #6d4cdb, #8b5cf6);
-  color: #ffffff;
-  font-family: 'Space Grotesk', 'Sora', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pricing-card-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(123, 92, 246, 0.4);
-}
-
-.pricing-card-beta-message {
-  font-family: 'Sora', 'Inter', sans-serif;
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.4);
-  margin-top: 1.5rem;
-  text-align: center;
-}
-
-/* Footer Styles */
-.app-footer {
-  padding: 4rem 2rem;
-  text-align: center;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.app-footer-tagline {
-  color: rgba(255,255,255,0.4);
-  font-size: 0.875rem;
-  font-family: 'Sora', 'Inter', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  margin-bottom: 1rem;
-}
-
-.app-footer-copyright {
-  color: rgba(255,255,255,0.2);
-  font-size: 0.75rem;
-  font-family: 'Sora', 'Inter', sans-serif;
-}
+.hero {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  
+  .section {
+    background: rgba(255,255,255,0.02);
+    padding: 3rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 10px 40px rgba(3,3,8,0.5);
+  }
+  
+  .section-title {
+    font-family: "Orbitron", sans-serif;
+    font-size: 2rem;
+    margin-bottom: 1.4rem;
+    text-align: center;
+  }
+  
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+  }
+  
+  .feature-card {
+    background: rgba(255,255,255,0.03);
+    padding: 1.2rem 1rem;
+    border-radius: 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform .2s ease, background .2s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-6px);
+    background: rgba(123,92,246,0.1);
+  }
+  
+  .pricing-wrap {
+    background: rgba(255,255,255,0.03);
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  .price {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: .6rem;
+  }
+  
+  .price-features div {
+    opacity: .9;
+    margin-top: .3rem;
+  }
+  

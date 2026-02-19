@@ -1,224 +1,199 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useWallet } from '@solana/wallet-adapter-react';
-import CustomWalletModal from './CustomWalletModal';
+import { motion, AnimatePresence } from 'framer-motion';
 import './Navigation.css';
 
 const Navigation = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { connected, disconnect, publicKey } = useWallet();
+  const [prices, setPrices] = useState({
+    solana: 0,
+    bitcoin: 0,
+    ethereum: 0,
+    bonk: 0,
+    jupiter: 0
+  });
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Twitter Tracker', path: '/twitter-tracker' },
-    { name: 'Pump Monitor', path: '/pump-monitor' },
-    { name: 'Token Deploy', path: '/token-deployment' },
-    { name: 'Risk Scanner', path: '/ai-risk-scanner' },
+    { name: 'Terminal', path: '/' },
+    { name: 'Context Engine', path: '/context-engine' },
+    { name: 'Twitter', path: '/twitter-tracker' },
     { name: 'Contact', path: '/contact' },
   ];
 
-  // Close mobile menu when route changes
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana,bitcoin,ethereum,bonk,jupiter-exchange-solana&vs_currencies=usd&include_24hr_change=true');
+        if (!response.ok) throw new Error('CORS or Network error');
+        const data = await response.json();
+        setPrices({
+          solana: data.solana,
+          bitcoin: data.bitcoin,
+          ethereum: data.ethereum,
+          bonk: data.bonk,
+          jupiter: data['jupiter-exchange-solana']
+        });
+      } catch (error) {
+        console.warn("Ticker fetch paused: Using baseline values", error);
+        setPrices({
+          solana: { usd: 142.38, usd_24h_change: 2.4 },
+          bitcoin: { usd: 68432.15, usd_24h_change: -0.3 },
+          ethereum: { usd: 2567.21, usd_24h_change: 1.2 },
+          bonk: { usd: 0.000021, usd_24h_change: 5.7 },
+          jupiter: { usd: 0.84, usd_24h_change: -1.2 }
+        });
+      }
+    };
 
-  // Handle navigation and scrolling
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleNavClick = (e, link) => {
     e.preventDefault();
+    navigate(link.path);
+  };
 
-    if (link.hash) {
-      // If it's a hash link, navigate to the path and then scroll
-      if (location.pathname !== link.path) {
-        // Navigate to the page first
-        navigate(link.path);
-
-        // Wait for page to load and then scroll to element
-        setTimeout(() => {
-          const element = document.getElementById(link.hash);
-          if (element) {
-            const offsetTop = element.offsetTop - 100; // Subtract nav height for precision
-            if (window.__lenis) {
-              window.__lenis.scrollTo(offsetTop, {
-                duration: 2.5,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-              });
-            } else {
-              window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-            }
-          }
-        }, 150);
-      } else {
-        // Already on the correct page, just scroll
-        const element = document.getElementById(link.hash);
-        if (element) {
-          const offsetTop = element.offsetTop - 100; // Subtract nav height for precision
-          if (window.__lenis) {
-            window.__lenis.scrollTo(offsetTop, {
-              duration: 2.5,
-              easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-            });
-          } else {
-            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-          }
-        }
-      }
-    } else {
-      // Regular navigation without hash
-      navigate(link.path);
-
-      // On regular navigation, ensure scroll is reset to top
-      setTimeout(() => {
-        if (window.__lenis) {
-          window.__lenis.scrollTo(0, { duration: 1.5, immediate: true });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 50);
-    }
-
-    setIsMenuOpen(false);
+  const TickerItem = ({ symbol, data }) => {
+    if (!data) return null;
+    const change = data.usd_24h_change;
+    const isPositive = change >= 0;
+    
+    return (
+      <div className="ticker-item">
+        <span className="ticker-symbol">{symbol}</span>
+        <span className="ticker-price">${data.usd < 1 ? data.usd.toFixed(6) : data.usd.toLocaleString()}</span>
+        <span className={`ticker-change ${isPositive ? 'positive' : 'negative'}`}>
+          {isPositive ? '▲' : '▼'} {Math.abs(change).toFixed(2)}%
+        </span>
+      </div>
+    );
   };
 
   return (
     <>
-      <nav className="main-nav">
-        <div className="nav-content-wrapper">
+      <nav className="glass-nav" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        background: 'rgba(8, 8, 14, 0.8)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+      }}>
+        <div className="nav-container">
+          <div className="nav-logo" onClick={() => navigate('/')}>
+            <div className="logo-glitch" data-text="dzz">dzz</div>
+          </div>
 
-          {/* Desktop Navigation */}
-          <div className="nav-desktop">
+          <div className="nav-links">
             {navLinks.map((link) => (
               <button
                 key={link.name}
                 onClick={(e) => handleNavClick(e, link)}
-                className="nav-link-button"
+                className={`nav-item ${location.pathname === link.path ? 'active' : ''}`}
               >
                 {link.name}
-                {/* Animated underline effect */}
-                <div className="nav-link-underline" />
-              </button>
-            ))}
-          </div>
-
-          {/* Mobile menu button */}
-          <div
-            className="nav-mobile-button"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="nav-mobile-button-style"
-              aria-label="Toggle menu"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                {isMenuOpen ? (
-                  <path d="M18 6L6 18M6 6l12 12" />
-                ) : (
-                  <path d="M3 12h18M3 6h18M3 18h18" />
+                {location.pathname === link.path && (
+                  <motion.div
+                    layoutId="nav-underline"
+                    className="nav-active-bar"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
                 )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`nav-mobile-menu ${isMenuOpen ? 'is-open' : ''}`}
-        >
-          <div className="nav-mobile-menu-content">
-            {navLinks.map((link, index) => (
-              <button
-                key={link.name}
-                onClick={(e) => handleNavClick(e, link)}
-                className="nav-mobile-menu-link"
-                style={{
-                  opacity: isMenuOpen ? 1 : 0,
-                  transform: isMenuOpen ? 'translateX(0)' : 'translateX(-10px)',
-                  transitionDelay: `${index * 0.05}s`,
-                }}
-              >
-                {link.name}
               </button>
             ))}
+          </div>
+
+          <div className="nav-socials" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}>
+            <a
+              href="https://twitter.com/dazzoxx"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                color: 'rgba(255, 255, 255, 0.6)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a
+              href="https://discord.gg/Y3uh3hN2"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                color: 'rgba(255, 255, 255, 0.6)',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </nav>
 
-      {/* Crypto ticker panel */}
-      <div className="crypto-ticker-panel">
-        <div className="crypto-ticker-content">
-          <div className="crypto-ticker-marquee">
-            {[
-              { name: 'SOL', price: '$142.38', change: '+2.4%', positive: true },
-              { name: 'ETH', price: '$2,567.21', change: '+1.2%', positive: true },
-              { name: 'BTC', price: '$68,432.15', change: '-0.3%', positive: false },
-              { name: 'DOGE', price: '$0.1245', change: '+5.7%', positive: true },
-              { name: 'SHIB', price: '$0.00000982', change: '+3.1%', positive: true },
-              { name: 'BNB', price: '$587.42', change: '+0.8%', positive: true },
-              { name: 'ADA', price: '$0.4831', change: '-1.2%', positive: false },
-              { name: 'SOL', price: '$142.38', change: '+2.4%', positive: true },
-              { name: 'ETH', price: '$2,567.21', change: '+1.2%', positive: true },
-              { name: 'BTC', price: '$68,432.15', change: '-0.3%', positive: false },
-              { name: 'SOL', price: '$142.38', change: '+2.4%', positive: true }, // Duplicate to ensure continuity
-              { name: 'ETH', price: '$2,567.21', change: '+1.2%', positive: true }, // Duplicate to ensure continuity
-              { name: 'BTC', price: '$68,432.15', change: '-0.3%', positive: false }, // Duplicate to ensure continuity
-            ].map((crypto, index) => (
-              <div
-                key={index}
-                className="crypto-ticker-item"
-              >
-                <span className="crypto-name">{crypto.name}</span>
-                <span className="crypto-price">{crypto.price}</span>
-                <span className={crypto.positive ? 'crypto-change-positive' : 'crypto-change-negative'}>{crypto.change}</span>
-              </div>
-            ))}
+      <div className="ticker-bar">
+        <div className="ticker-track">
+          <div className="ticker-content">
+            <TickerItem symbol="SOL" data={prices.solana} />
+            <TickerItem symbol="BTC" data={prices.bitcoin} />
+            <TickerItem symbol="ETH" data={prices.ethereum} />
+            <TickerItem symbol="BONK" data={prices.bonk} />
+            <TickerItem symbol="JUP" data={prices.jupiter} />
+            <TickerItem symbol="SOL" data={prices.solana} />
+            <TickerItem symbol="BTC" data={prices.bitcoin} />
+            <TickerItem symbol="ETH" data={prices.ethereum} />
+            <TickerItem symbol="BONK" data={prices.bonk} />
+            <TickerItem symbol="JUP" data={prices.jupiter} />
           </div>
         </div>
       </div>
-
-      {/* Wallet Connection Button */}
-      <div className="wallet-connection-container">
-        {connected ? (
-          <div className="wallet-info">
-            <div className="wallet-address">
-              {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-            </div>
-            <button
-              onClick={disconnect}
-              className="disconnect-button"
-            >
-              Disconnect
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsWalletModalOpen(true)}
-            className="connect-wallet-button"
-          >
-            Connect Wallet
-          </button>
-        )}
-      </div>
-
-
-      <CustomWalletModal
-        isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
-      />
     </>
   );
 };
