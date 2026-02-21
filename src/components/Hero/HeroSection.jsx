@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useTransform as useTransformMotion } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useTransform as useTransformMotion, useInView } from 'framer-motion';
 import HolographicTerminal from './HolographicTerminal';
 import TypingText from '../TypingText';
 import { useReducedMotion, useMediaQuery } from '../../hooks/useReducedMotion';
@@ -17,6 +17,44 @@ const activityItems = [
   { action: 'kol signal', target: '@elonmusk', time: '1m ago', type: 'signal' },
 ];
 
+const TypingCharText = memo(function TypingCharText({ text, delay = 0, charDelay = 0.04, gradient = false }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+  const inView = useInView(ref, { amount: 0.5 });
+
+  useEffect(() => {
+    if (inView) {
+      const timer = setTimeout(() => setVisible(true), delay * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [inView, delay]);
+
+  return (
+    <span ref={ref} style={{ display: 'inline-flex', overflow: 'hidden' }}>
+      {text.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
+          animate={visible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          transition={{
+            duration: 0.4,
+            delay: delay + i * charDelay,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{ 
+            display: 'inline-block',
+            background: gradient ? 'linear-gradient(135deg, rgba(147, 130, 255, 0.7), rgba(130, 200, 255, 0.6))' : 'none',
+            WebkitBackgroundClip: gradient ? 'text' : 'unset',
+            WebkitTextFillColor: gradient ? 'transparent' : 'unset',
+          }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+});
+
 const HeroSection = memo(function HeroSection({
   title = "AI DEGEN RADAR",
   tagline = "AI-powered pump.fun tracking. Never miss a launch.",
@@ -28,8 +66,11 @@ const HeroSection = memo(function HeroSection({
   const [expandedActivity, setExpandedActivity] = useState(null);
   const containerRef = useRef(null);
   const activityRef = useRef(null);
+  const headerRef = useRef(null);
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const headerInView = useInView(headerRef, { amount: 0.5 });
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -42,8 +83,8 @@ const HeroSection = memo(function HeroSection({
 
   const activityMouseX = useMotionValue(0);
   const activityMouseY = useMotionValue(0);
-  const activityRotateX = useSpring(useTransformMotion(activityMouseY, [-0.5, 0.5], [8, -8]), { stiffness: 300, damping: 30 });
-  const activityRotateY = useSpring(useTransformMotion(activityMouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 300, damping: 30 });
+  const activityRotateX = useSpring(useTransformMotion(activityMouseY, [-0.5, 0.5], [10, -10]), { stiffness: 120, damping: 15 });
+  const activityRotateY = useSpring(useTransformMotion(activityMouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 120, damping: 15 });
 
   const handleActivityMouseMove = (e) => {
     if (reducedMotion || isMobile) return;
@@ -228,15 +269,9 @@ const HeroSection = memo(function HeroSection({
               marginBottom: '1.5rem',
             }}
           >
-            stop guessing.
+            <TypingCharText text="stop guessing." delay={0.4} charDelay={0.055} />
             <br />
-            <span style={{
-              background: 'linear-gradient(135deg, rgba(147, 130, 255, 0.7), rgba(130, 200, 255, 0.6))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              start knowing.
-            </span>
+            <TypingCharText text="start knowing." delay={1.3} charDelay={0.055} gradient={true} />
           </motion.h1>
 
           <AnimatePresence>
@@ -298,7 +333,7 @@ const HeroSection = memo(function HeroSection({
           </motion.div>
         </motion.div>
 
-        {/* Wallet Card - Now First and Expanded */}
+        {/* Wallet Card */}
         <AnimatePresence>
           {showContent && (
             <motion.div
@@ -308,7 +343,7 @@ const HeroSection = memo(function HeroSection({
               style={{
                 width: '100%',
                 maxWidth: '720px',
-                marginBottom: '2.5rem',
+                marginBottom: '6rem',
               }}
             >
               {children}
@@ -316,7 +351,7 @@ const HeroSection = memo(function HeroSection({
           )}
         </AnimatePresence>
 
-        {/* Terminal + Activity Panel - Now Below */}
+        {/* Terminal + Activity Panel */}
         <AnimatePresence>
           {showContent && (
             <motion.div
@@ -325,132 +360,345 @@ const HeroSection = memo(function HeroSection({
               transition={{ duration: 0.8, delay: 0.5 }}
               style={{
                 display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: '1.5rem',
+                flexDirection: 'column',
+                gap: '4rem',
                 width: '100%',
                 maxWidth: '900px',
-                justifyContent: 'center',
-                alignItems: isMobile ? 'center' : 'flex-start',
               }}
             >
-              <HolographicTerminal width={isMobile ? 340 : 400} height={isMobile ? 320 : 380} />
-              
-              {/* Activity Panel with Tilt Effects */}
-              <div
+              {/* Creative Animated Header */}
+              <motion.div
+                ref={headerRef}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
                 style={{
-                  perspective: 1000,
-                  transformStyle: 'preserve-3d',
-                  width: isMobile ? '340px' : '360px',
+                  width: '100%',
+                  textAlign: 'center',
+                  position: 'relative',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  cursor: 'default',
+                  marginBottom: '1rem',
                 }}
               >
+                <motion.h2
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+                    fontWeight: 400,
+                    color: 'rgba(255, 255, 255, 0.3)',
+                    textTransform: 'lowercase',
+                    letterSpacing: '0.08em',
+                    position: 'relative',
+                    display: 'inline-flex',
+                    padding: '0.5rem 1rem',
+                  }}
+                >
+                  {/* Light sweep effect - triggers when scrolling into view */}
+                  <motion.div
+                    initial={{ x: '-150%', opacity: 0 }}
+                    animate={headerInView ? { x: '250%', opacity: [0, 1, 1, 0] } : { x: '-150%', opacity: 0 }}
+                    transition={{ duration: 1.8, ease: 'easeInOut', delay: 0.3 }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '60%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(123, 92, 246, 0.5) 40%, rgba(0, 212, 255, 0.5) 50%, rgba(123, 92, 246, 0.5) 60%, transparent 100%)',
+                      filter: 'blur(3px)',
+                      pointerEvents: 'none',
+                      zIndex: 0,
+                    }}
+                  />
+                  
+                  <span style={{ position: 'relative', zIndex: 1 }}>
+                    <TypingCharText text="make trenching easier." delay={0.5} charDelay={0.05} />
+                  </span>
+                </motion.h2>
+              </motion.div>
+
+              {/* Terminal and Activity Row */}
+              <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: '1.5rem',
+                justifyContent: 'center',
+                alignItems: isMobile ? 'center' : 'center',
+              }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <HolographicTerminal width={isMobile ? 340 : 400} height={isMobile ? 320 : 380} />
+                </motion.div>
+                
+                {/* Vertical pump.fun text BETWEEN the cards */}
+                {!isMobile && (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '380px',
+                    padding: '0 0.5rem',
+                  }}>
+                    {"pump.fun".split('').map((char, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        transition={{
+                          duration: 0.4,
+                          delay: 1.5 + i * 0.08,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '0.6rem',
+                          fontWeight: 400,
+                          color: 'rgba(255, 255, 255, 0.15)',
+                          letterSpacing: '0.15em',
+                          display: 'block',
+                          lineHeight: '1.4',
+                        }}
+                      >
+                        {char}
+                      </motion.span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Activity Panel */}
                 <motion.div
                   ref={activityRef}
                   onMouseMove={handleActivityMouseMove}
                   onMouseLeave={handleActivityMouseLeave}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
+                  initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   style={{
-                    width: '100%',
-                    padding: '1.5rem',
-                    background: 'linear-gradient(165deg, rgba(12, 12, 22, 0.85), rgba(6, 6, 14, 0.9))',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
-                    borderRadius: '16px',
-                    backdropFilter: 'blur(20px)',
-                    boxShadow: '0 25px 50px -15px rgba(0, 0, 0, 0.5)',
-                    cursor: 'pointer',
-                    rotateX: reducedMotion || isMobile ? 0 : activityRotateX,
-                    rotateY: reducedMotion || isMobile ? 0 : activityRotateY,
+                    width: isMobile ? '340px' : '400px',
+                    height: isMobile ? 320 : 380,
+                    perspective: 1000,
                     transformStyle: 'preserve-3d',
                   }}
                 >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                  marginBottom: '1.5rem',
-                  paddingBottom: '1rem',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                }}>
                   <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 2, repeat: Infinity }}
                     style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      background: 'rgba(130, 255, 180, 0.6)',
-                      boxShadow: '0 0 10px rgba(130, 255, 180, 0.4)',
-                    }}
-                  />
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    color: 'rgba(255, 255, 255, 0.5)',
-                  }}>
-                    live activity
-                  </span>
-                </div>
-
-                {activityItems.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + i * 0.1 }}
-                    whileHover={{ 
-                      x: 4, 
-                      background: 'rgba(255, 255, 255, 0.02)',
-                    }}
-                    onClick={() => setExpandedActivity(expandedActivity === i ? null : i)}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '0.75rem',
-                      marginBottom: '0.5rem',
-                      borderRadius: '10px',
-                      border: expandedActivity === i ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
+                      width: '100%',
+                      height: '100%',
+                      rotateX: reducedMotion || isMobile ? 0 : activityRotateX,
+                      rotateY: reducedMotion || isMobile ? 0 : activityRotateY,
+                      transformStyle: 'preserve-3d',
                     }}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.7rem',
-                        color: expandedActivity === i ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-                        marginBottom: '0.15rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                      }}>
-                        {item.type === 'alert' && (
-                          <span style={{ color: 'rgba(255, 200, 100, 0.7)' }}>!</span>
-                        )}
-                        {item.type === 'risk' && (
-                          <span style={{ color: 'rgba(255, 100, 100, 0.7)' }}>!</span>
-                        )}
-                        {item.action}
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(5, 5, 15, 0.95))',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(123, 92, 246, 0.3)',
+                        boxShadow: `
+                          0 0 0 1px rgba(0, 240, 255, 0.1),
+                          0 20px 50px rgba(0, 0, 0, 0.5),
+                          0 0 100px rgba(123, 92, 246, 0.15),
+                          inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                        `,
+                        overflow: 'hidden',
+                        backdropFilter: 'blur(20px)',
+                      }}
+                    >
+                      {/* Scanlines effect */}
+                      {!reducedMotion && (
+                        <>
+                          <div
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.03) 2px, rgba(0, 240, 255, 0.03) 4px)',
+                              pointerEvents: 'none',
+                              animation: 'scanlines 8s linear infinite',
+                            }}
+                          />
+                          <motion.div
+                            animate={{ opacity: [0.3, 0.6, 0.3] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '100%',
+                              background: 'linear-gradient(180deg, rgba(0, 240, 255, 0.1) 0%, transparent 50%, rgba(123, 92, 246, 0.1) 100%)',
+                              pointerEvents: 'none',
+                            }}
+                          />
+                        </>
+                      )}
+
+                      {/* Top gradient line */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: '2px',
+                          background: 'linear-gradient(90deg, transparent, rgba(123, 92, 246, 0.8), rgba(0, 240, 255, 0.8), transparent)',
+                          opacity: 0.8,
+                        }}
+                      />
+
+                      {/* Terminal header bar */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: '40px',
+                          background: 'rgba(0, 0, 0, 0.3)',
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '0 16px',
+                          gap: '8px',
+                        }}
+                      >
+                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
+                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }} />
+                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }} />
+                        <motion.div
+                          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: 'rgba(130, 255, 180, 0.7)',
+                            boxShadow: '0 0 12px rgba(130, 255, 180, 0.5)',
+                            marginLeft: '12px',
+                          }}
+                        />
+                        <span style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '11px',
+                          color: 'rgba(255, 255, 255, 0.4)',
+                          letterSpacing: '0.1em',
+                        }}>
+                          LIVE ACTIVITY
+                        </span>
                       </div>
+
+                      {/* Content */}
                       <div style={{
-                        fontFamily: "'JetBrains Mono', monospace",
-                        fontSize: '0.65rem',
-                        color: 'rgba(255, 255, 255, 0.3)',
+                        position: 'absolute',
+                        top: '48px',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        padding: '16px 20px',
+                        overflow: 'hidden',
                       }}>
-                        {item.target}
+                        {activityItems.map((item, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.7 + i * 0.1 }}
+                            whileHover={{ x: 6, backgroundColor: 'rgba(0, 240, 255, 0.03)' }}
+                            onClick={() => setExpandedActivity(expandedActivity === i ? null : i)}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '0.7rem 0.8rem',
+                              marginBottom: '0.4rem',
+                              borderRadius: '8px',
+                              border: expandedActivity === i ? '1px solid rgba(130, 255, 180, 0.2)' : '1px solid transparent',
+                              cursor: 'pointer',
+                              background: expandedActivity === i ? 'rgba(130, 255, 180, 0.03)' : 'transparent',
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <div style={{
+                                fontFamily: "'JetBrains Mono', monospace",
+                                fontSize: '0.68rem',
+                                color: expandedActivity === i ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.5)',
+                                marginBottom: '0.1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                              }}>
+                                {item.type === 'alert' && (
+                                  <span style={{ color: 'rgba(255, 200, 100, 0.8)' }}>◆</span>
+                                )}
+                                {item.type === 'risk' && (
+                                  <span style={{ color: 'rgba(255, 100, 100, 0.8)' }}>◆</span>
+                                )}
+                                {item.type === 'signal' && (
+                                  <span style={{ color: 'rgba(130, 200, 255, 0.8)' }}>◆</span>
+                                )}
+                                {item.action}
+                              </div>
+                              <div style={{
+                                fontFamily: "'JetBrains Mono', monospace",
+                                fontSize: '0.6rem',
+                                color: 'rgba(255, 255, 255, 0.3)',
+                              }}>
+                                {item.target}
+                              </div>
+                            </div>
+                            <span style={{
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: '0.55rem',
+                              color: 'rgba(255, 255, 255, 0.25)',
+                            }}>
+                              {item.time}
+                            </span>
+                          </motion.div>
+                        ))}
                       </div>
+
+                      {!reducedMotion && (
+                        <motion.div
+                          animate={{
+                            opacity: [0, 1, 0],
+                            y: [0, 200],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: '100px',
+                            background: 'linear-gradient(180deg, rgba(0, 240, 255, 0.1), transparent)',
+                            pointerEvents: 'none',
+                          }}
+                        />
+                      )}
                     </div>
-                    <span style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: '0.6rem',
-                      color: 'rgba(255, 255, 255, 0.25)',
-                    }}>
-                      {item.time}
-                    </span>
                   </motion.div>
-                ))}
+
+                  <style>{`
+                    @keyframes scanlines {
+                      0% { transform: translateY(0); }
+                      100% { transform: translateY(100%); }
+                    }
+                  `}</style>
                 </motion.div>
               </div>
             </motion.div>

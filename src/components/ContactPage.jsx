@@ -27,7 +27,7 @@ const ContactPage = memo(function ContactPage() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: isMobile ? '6rem 1.5rem 2rem' : '8rem 2rem 2rem',
+      padding: isMobile ? '4rem 1.5rem 2rem' : '5rem 2rem 2rem',
     }}>
       <motion.div
         initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -75,17 +75,23 @@ const ContactPage = memo(function ContactPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         style={{
           width: '100%',
-          maxWidth: '420px',
-          borderRadius: '20px',
+          maxWidth: '600px',
+          borderRadius: '28px',
           overflow: 'hidden',
           border: '1px solid rgba(255, 255, 255, 0.04)',
-          background: 'rgba(255, 255, 255, 0.02)',
+          background: 'rgba(8, 8, 14, 0.6)',
           backdropFilter: 'blur(40px)',
           WebkitBackdropFilter: 'blur(40px)',
+          boxShadow: `
+            0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+            0 60px 120px -30px rgba(0, 0, 0, 0.7),
+            0 0 100px -40px rgba(123, 92, 246, 0.12)
+          `,
+          margin: '0 auto',
         }}
       >
         <div style={{
-          padding: '2.5rem 2rem',
+          padding: '3.5rem 3rem',
           textAlign: 'center',
         }}>
           <div style={{
@@ -163,9 +169,9 @@ const ContactPage = memo(function ContactPage() {
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
           gap: '1rem',
-          marginTop: '2rem',
+          marginTop: '2.5rem',
           width: '100%',
-          maxWidth: '420px',
+          maxWidth: '600px',
         }}
       >
         {[
@@ -175,10 +181,10 @@ const ContactPage = memo(function ContactPage() {
           <div
             key={i}
             style={{
-              padding: '1.25rem',
-              background: 'rgba(255, 255, 255, 0.02)',
+              padding: '1.5rem',
+              background: 'rgba(8, 8, 14, 0.5)',
               border: '1px solid rgba(255, 255, 255, 0.04)',
-              borderRadius: '14px',
+              borderRadius: '18px',
             }}
           >
             <div style={{

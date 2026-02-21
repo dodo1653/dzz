@@ -13,7 +13,6 @@
 
 .wallet-card {
   background: rgba(10, 12, 30, 0.6);
-  backdrop-filter: blur(12px);
   border: 1px solid rgba(124, 104, 238, 0.25);
   border-radius: 18px;
   padding: 2rem 3rem;
@@ -25,8 +24,7 @@
 }
 
 .wallet-card:hover {
-  box-shadow: 0 0 40px rgba(124, 104, 238, 0.45);
-  transform: translateY(-4px);
+  box-shadow: 0 0 30px rgba(124, 104, 238, 0.35);
 }
 
 .brand {

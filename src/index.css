@@ -34,17 +34,9 @@ html,body,#root{
 }
 html,body{
   min-height: 100vh;
-  /* Enable hardware acceleration for all elements */
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
-  /* Optimize rendering pipeline */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  backface-visibility: hidden;
-  perspective: 1000px;
+  -webkit-overflow-scrolling: touch;
 }
 body{
   margin: 0;
@@ -53,17 +45,7 @@ body{
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Optimize rendering */
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
-  /* Optimize for smoother scrolling */
   -webkit-overflow-scrolling: touch;
-  /* Additional high-performance rendering optimizations */
-  will-change: auto;
-  contain: layout style paint;
 }
 
 /* Lenis smooth scroll - optimized for performance */
@@ -190,8 +172,15 @@ html {
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+}
+
+/* Exception for fixed overlays like modals */
+.wallet-modal-overlay,
+[data-portal] {
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  transform: none !important;
+  -webkit-transform: none !important;
 }
 
 /* Premium glass morphism */
@@ -253,31 +242,39 @@ html {
   transform: translateZ(0);
 }
 
-/* Optimized glass card - using more performant properties */
+/* Wallet card with holographic effect - no borders */
 .wallet-card{
   width: 100%;
   min-height: 280px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(5, 5, 15, 0.95));
+  border-radius: 20px;
   padding: 32px;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 24px 80px rgba(6,10,20,0.7), 0 0 1px rgba(123,92,246,0.2);
-  /* More performant backdrop-filter */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border: none;
+  box-shadow: 
+    0 0 0 1px rgba(0, 240, 255, 0.1),
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 100px rgba(123, 92, 246, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: #e6f3ff;
-  /* Optimized transition using transform and opacity */
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 24px;
-  /* Hardware acceleration */
-  will-change: transform, box-shadow;
+  position: relative;
+  overflow: hidden;
 }
+
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
 .wallet-card:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 32px 100px rgba(0,160,255,0.12), 0 0 40px rgba(123,92,246,0.15);
-  border-color: rgba(123,92,246,0.2);
+  box-shadow: 
+    0 0 0 1px rgba(0, 240, 255, 0.15),
+    0 25px 60px rgba(0, 0, 0, 0.5),
+    0 0 120px rgba(123, 92, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* top row */
@@ -740,7 +737,8 @@ button.wallet-adapter-button.wallet-adapter-button-trigger::before {
   height: 100% !important;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
   transition: left 0.5s ease !important;
-  z-index: 1 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
 }
 
 .connect-btn:hover::before,

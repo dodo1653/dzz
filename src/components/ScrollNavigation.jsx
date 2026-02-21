@@ -1,6 +1,39 @@
-import React, { useRef, useState, memo } from 'react';
+import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
+
+const TypingCharText = memo(function TypingCharText({ text, delay = 0, charDelay = 0.04 }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+  const inView = useInView(ref, { amount: 0.5 });
+
+  useEffect(() => {
+    if (inView) {
+      const timer = setTimeout(() => setVisible(true), delay * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [inView, delay]);
+
+  return (
+    <span ref={ref} style={{ display: 'inline-flex', overflow: 'hidden' }}>
+      {text.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
+          animate={visible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          transition={{
+            duration: 0.4,
+            delay: delay + i * charDelay,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{ display: 'inline-block' }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+});
 
 const GlassDot = memo(function GlassDot({ isActive, onClick, label }) {
   const reducedMotion = useReducedMotion();
@@ -156,67 +189,54 @@ const FeatureCard = memo(function FeatureCard({ feature }) {
     <motion.div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.03, y: -4 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.2 }}
       style={{
         flexShrink: 0,
-        width: '280px',
+        width: '260px',
         padding: '1.25rem',
-        background: isHovered 
-          ? 'rgba(255, 255, 255, 0.04)'
-          : 'rgba(255, 255, 255, 0.015)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRadius: '16px',
-        border: isHovered 
-          ? '1px solid rgba(255, 255, 255, 0.1)' 
-          : '1px solid rgba(255, 255, 255, 0.04)',
+        background: isHovered ? 'rgba(14, 14, 24, 0.95)' : 'rgba(10, 10, 18, 0.9)',
+        borderRadius: '4px',
+        border: isHovered ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.04)',
         boxShadow: isHovered 
-          ? `0 20px 40px -15px rgba(0,0,0, 0.5), 0 0 30px -10px ${feature.accent}`
-          : '0 10px 30px -15px rgba(0,0,0, 0.3)',
+          ? '0 20px 40px -15px rgba(0, 0, 0, 0.5)'
+          : '0 8px 20px -10px rgba(0, 0, 0, 0.4)',
         cursor: 'pointer',
       }}
     >
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '0.85rem',
-        marginBottom: '0.75rem',
+        gap: '0.75rem',
+        marginBottom: '0.7rem',
       }}>
-        <motion.div
-          animate={isHovered ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
-            background: feature.gradient,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(255, 255, 255, 0.9)',
-            boxShadow: `0 6px 15px ${feature.accent}`,
-          }}
-        >
+        <div style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '4px',
+          background: feature.gradient,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'rgba(255, 255, 255, 0.85)',
+        }}>
           {icons[feature.icon]}
-        </motion.div>
+        </div>
         <h3 style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'Inter', -apple-system, sans-serif",
           fontSize: '0.85rem',
           fontWeight: 500,
-          color: isHovered ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.5)',
-          letterSpacing: '0.01em',
+          color: isHovered ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.6)',
           margin: 0,
-          textTransform: 'lowercase',
         }}>
           {feature.title}
         </h3>
       </div>
       <p style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.75rem',
-        color: 'rgba(255, 255, 255, 0.35)',
-        lineHeight: 1.6,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+        fontSize: '0.8rem',
+        color: 'rgba(255, 255, 255, 0.4)',
+        lineHeight: 1.55,
         margin: 0,
       }}>
         {feature.description}
@@ -258,23 +278,28 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
         }}
       >
         <p style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.65rem',
-          color: 'rgba(255, 255, 255, 0.35)',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '0.7rem',
+          fontWeight: 500,
+          color: 'rgba(255, 255, 255, 0.4)',
           letterSpacing: '0.15em',
-          marginBottom: '1rem',
-          textTransform: 'lowercase',
+          marginBottom: '0.75rem',
+          textTransform: 'uppercase',
         }}>
-          your arsenal
+          Your Arsenal
         </p>
         <h2 style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 'clamp(1.4rem, 4vw, 1.9rem)',
-          fontWeight: 400,
-          color: 'rgba(255, 255, 255, 0.6)',
-          letterSpacing: '-0.01em',
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: 'clamp(1.6rem, 4vw, 2rem)',
+          fontWeight: 500,
+          color: 'rgba(255, 255, 255, 0.85)',
+          letterSpacing: '-0.02em',
         }}>
-          every tool you <span style={{ color: 'rgba(130, 255, 180, 0.7)' }}>need</span>.
+          <TypingCharText text="Every tool you " delay={0.2} charDelay={0.05} />
+          <span style={{ color: 'rgba(130, 255, 180, 0.85)' }}>
+            <TypingCharText text="need" delay={0.95} charDelay={0.05} />
+          </span>
+          <TypingCharText text="." delay={1.15} charDelay={0.05} />
         </h2>
       </motion.div>
       

@@ -1,5 +1,5 @@
 import React, { useRef, useState, memo } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
 
 const pricingFeatures = [
@@ -18,204 +18,172 @@ const PricingCard = memo(function PricingCard() {
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 30 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 30 });
-
-  const handleMouseMove = (e) => {
-    if (reducedMotion || isMobile) return;
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
   return (
-    <div
+    <motion.div
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ y: -8, scale: 1.01 }}
       style={{
-        perspective: 1000,
-        transformStyle: 'preserve-3d',
-        maxWidth: '440px',
+        maxWidth: '420px',
         margin: '0 auto',
+        background: isHovered 
+          ? 'linear-gradient(180deg, rgba(20, 20, 32, 0.98) 0%, rgba(14, 14, 24, 0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(14, 14, 24, 0.98) 0%, rgba(10, 10, 18, 0.98) 100%)',
+        border: isHovered 
+          ? '1px solid rgba(255, 255, 255, 0.12)' 
+          : '1px solid rgba(255, 255, 255, 0.06)',
+        borderRadius: '28px',
+        padding: '3rem',
+        boxShadow: isHovered 
+          ? '0 50px 100px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.03) inset'
+          : '0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.02) inset',
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
       }}
     >
-      <motion.div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          width: '100%',
-          background: 'linear-gradient(180deg, rgba(16, 16, 26, 0.95), rgba(10, 10, 18, 0.98))',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '6px 14px',
+          background: 'rgba(123, 92, 246, 0.1)',
+          border: '1px solid rgba(123, 92, 246, 0.2)',
           borderRadius: '20px',
-          padding: '2.5rem',
-          backdropFilter: 'blur(20px)',
-          boxShadow: isHovered 
-            ? '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 40px -10px rgba(130, 200, 255, 0.1)'
-            : '0 20px 50px -15px rgba(0, 0, 0, 0.5)',
-          rotateX: reducedMotion || isMobile ? 0 : rotateX,
-          rotateY: reducedMotion || isMobile ? 0 : rotateY,
-          transformStyle: 'preserve-3d',
-          transition: 'box-shadow 0.3s ease',
-        }}
-      >
-        {/* Glow effect on hover */}
-        {isHovered && !reducedMotion && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'absolute',
-              inset: -1,
-              background: 'linear-gradient(135deg, rgba(130, 200, 255, 0.1), rgba(147, 130, 255, 0.1))',
-              borderRadius: '20px',
-              zIndex: -1,
-              filter: 'blur(20px)',
-            }}
-          />
-        )}
-
-        <div style={{ textAlign: 'center' }}>
-          <motion.div
-            animate={isHovered ? { scale: 1.02 } : { scale: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '0.7rem',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255, 0.4)',
-              letterSpacing: '0.15em',
-              marginBottom: '1.5rem',
-              textTransform: 'lowercase',
-            }}
-          >
-            pro access
-          </motion.div>
-
-          <motion.div
-            animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              marginBottom: '2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-            }}
-          >
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '3rem',
-              fontWeight: 500,
-              color: 'rgba(255, 255, 255, 0.7)',
-              letterSpacing: '-0.02em',
-              lineHeight: '1',
-            }}>
-              0.1
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <span style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '1.5rem',
-                fontWeight: 400,
-                color: 'rgba(255, 255, 255, 0.5)',
-              }}>
-                SOL
-              </span>
-              <span style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.75rem',
-                fontWeight: 400,
-                color: 'rgba(255, 255, 255, 0.3)',
-              }}>
-                /month
-              </span>
-            </div>
-          </motion.div>
-
-          <ul style={{
-            listStyle: 'none',
-            padding: 0,
-            margin: '2rem 0',
-            textAlign: 'left'
-          }}>
-            {pricingFeatures.map((item, idx) => (
-              <motion.li
-                key={idx}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.05 }}
-                whileHover={{ x: 4 }}
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.45)',
-                  marginBottom: '0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                  cursor: 'default',
-                }}
-              >
-                <motion.span
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: idx * 0.2 }}
-                  style={{
-                    color: 'rgba(130, 255, 180, 0.6)',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  ✓
-                </motion.span>
-                {item}
-              </motion.li>
-            ))}
-          </ul>
-
-          <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            style={{
-              width: '100%',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontFamily: "'JetBrains Mono', monospace",
-              fontWeight: 500,
-              fontSize: '0.8rem',
-              padding: '0.9rem',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            coming soon
-          </motion.button>
-
+          marginBottom: '2rem',
+        }}>
+          <div style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: 'rgba(123, 92, 246, 0.8)',
+          }} />
           <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.65rem',
-            color: 'rgba(255, 255, 255, 0.25)',
-            marginTop: '1.25rem'
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            color: 'rgba(167, 139, 250, 0.9)',
+            letterSpacing: '0.08em',
+            margin: 0,
           }}>
-            beta launching soon. join discord for early access.
+            PRO ACCESS
           </p>
         </div>
-      </motion.div>
-    </div>
+
+        <div style={{
+          marginBottom: '2.5rem',
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'center',
+          gap: '10px',
+        }}>
+          <span style={{
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: '4rem',
+            fontWeight: 600,
+            color: 'rgba(255, 255, 255, 0.95)',
+            letterSpacing: '-0.04em',
+            lineHeight: '1',
+          }}>
+            0.1
+          </span>
+          <span style={{
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: '1.35rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.7)',
+          }}>
+            SOL
+          </span>
+          <span style={{
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: '1rem',
+            fontWeight: 400,
+            color: 'rgba(255, 255, 255, 0.4)',
+          }}>
+            /mo
+          </span>
+        </div>
+
+        <div style={{
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
+          margin: '0 -1rem 2rem',
+        }} />
+
+        <ul style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: '0 0 2.5rem',
+          textAlign: 'left'
+        }}>
+          {pricingFeatures.map((item, idx) => (
+            <motion.li
+              key={idx}
+              initial={{ opacity: 0, x: -10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.04 }}
+              style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                fontSize: '0.9rem',
+                color: 'rgba(255, 255, 255, 0.7)',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                cursor: 'default',
+              }}
+            >
+              <span style={{
+                width: '22px',
+                height: '22px',
+                borderRadius: '7px',
+                background: 'rgba(74, 222, 128, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'rgba(74, 222, 128, 0.9)',
+                fontSize: '0.65rem',
+                flexShrink: 0,
+              }}>
+                ✓
+              </span>
+              {item}
+            </motion.li>
+          ))}
+        </ul>
+
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          style={{
+            width: '100%',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            color: 'rgba(255, 255, 255, 0.85)',
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            padding: '1.1rem 1.5rem',
+            borderRadius: '16px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Coming Soon
+        </motion.button>
+
+        <p style={{
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '0.8rem',
+          color: 'rgba(255, 255, 255, 0.35)',
+          marginTop: '1.5rem'
+        }}>
+          Beta launching soon. Join Discord for early access.
+        </p>
+      </div>
+    </motion.div>
   );
 });
 
@@ -237,60 +205,43 @@ const PricingSection = memo(function PricingSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, amount: 0.3 }}
         transition={{ duration: 0.5 }}
-        style={{ textAlign: 'center', marginBottom: '3rem' }}
+        style={{ textAlign: 'center', marginBottom: '3.5rem' }}
       >
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.65rem',
-            color: 'rgba(255, 255, 255, 0.35)',
-            letterSpacing: '0.2em',
-            marginBottom: '1rem',
-            textTransform: 'lowercase',
-          }}
-        >
-          membership
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-            fontWeight: 400,
-            color: 'rgba(255, 255, 255, 0.6)',
-            letterSpacing: '-0.01em',
-            marginBottom: '0.5rem',
-          }}
-        >
-          simple pricing.
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.8rem',
-            color: 'rgba(255, 255, 255, 0.35)',
-            marginTop: '0.5rem',
-          }}
-        >
-          pay with SOL. cancel anytime.
-        </motion.p>
+        <p style={{
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '0.7rem',
+          fontWeight: 600,
+          color: 'rgba(255, 255, 255, 0.35)',
+          letterSpacing: '0.15em',
+          marginBottom: '1rem',
+          textTransform: 'uppercase',
+        }}>
+          Membership
+        </p>
+        <h2 style={{
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: 'clamp(2rem, 5vw, 2.75rem)',
+          fontWeight: 600,
+          color: 'rgba(255, 255, 255, 0.95)',
+          letterSpacing: '-0.03em',
+        }}>
+          Simple pricing.
+        </h2>
+        <p style={{
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          fontSize: '1rem',
+          color: 'rgba(255, 255, 255, 0.45)',
+          marginTop: '0.75rem',
+        }}>
+          Pay with SOL. Cancel anytime.
+        </p>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
         <PricingCard />
       </motion.div>

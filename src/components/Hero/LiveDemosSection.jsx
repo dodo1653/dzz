@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, memo } from 'react';
+import { useRef, useState, useEffect, memo, forwardRef } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../../hooks/useReducedMotion';
 
@@ -89,150 +89,155 @@ const InteractiveDemo = memo(function InteractiveDemo({
   index,
 }) {
   const ref = useRef(null);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
   const isInView = useInView(ref, { amount: 0.3, once: false });
   const reducedMotion = useReducedMotion();
+  const [isHovered, setIsHovered] = useState(false);
 
   const icons = {
     twitter: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
       </svg>
     ),
     shield: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/>
         <path d="M9 12l2 2 4-4" strokeWidth="2"/>
       </svg>
     ),
     brain: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <circle cx="12" cy="12" r="3"/>
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
       </svg>
     ),
   };
 
-  const handleMouseMove = (e) => {
-    if (!ref.current || reducedMotion) return;
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rotateX = (e.clientY - centerY) / 25;
-    const rotateY = (e.clientX - centerX) / 25;
-    setRotation({ x: -rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setRotation({ x: 0, y: 0 });
-    setIsHovered(false);
-  };
-
   return (
     <motion.div
       ref={ref}
-      initial={reducedMotion ? {} : { opacity: 0, y: 40 }}
+      initial={reducedMotion ? {} : { opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.15 }}
-      onMouseMove={handleMouseMove}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ y: -4 }}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         flex: 1,
         minWidth: '300px',
-        background: isHovered 
-          ? 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
-          : 'rgba(255, 255, 255, 0.02)',
-        border: isHovered 
-          ? '1px solid rgba(255,255,255,0.1)' 
-          : '1px solid rgba(255, 255, 255, 0.04)',
-        borderRadius: '20px',
-        overflow: 'hidden',
-        transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-        transition: 'transform 0.15s ease-out, background 0.3s ease, border-color 0.3s ease',
-        boxShadow: isHovered 
-          ? '0 25px 50px -15px rgba(0,0,0,0.5)'
-          : 'none',
       }}
     >
-      <div style={{
-        padding: '1.25rem 1.5rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-      }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          background: 'rgba(8, 8, 14, 0.9)',
+          borderRadius: '20px',
+          border: isHovered 
+            ? '1px solid rgba(255, 255, 255, 0.08)' 
+            : '1px solid rgba(255, 255, 255, 0.04)',
+          boxShadow: isHovered 
+            ? '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.02) inset'
+            : '0 20px 50px -20px rgba(0, 0, 0, 0.5)',
+          overflow: 'hidden',
+          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+      >
+        {/* Subtle gradient overlay */}
         <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '10px',
-          background: 'rgba(255, 255, 255, 0.05)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'rgba(255, 255, 255, 0.6)',
-        }}>
-          {icons[icon]}
-        </div>
-        <div>
-          <h4 style={{
-            fontFamily: "'Archivo', sans-serif",
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            color: 'rgba(255, 255, 255, 0.9)',
-            margin: 0,
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.02) 0%, transparent 50%, rgba(0, 212, 255, 0.02) 100%)',
+          pointerEvents: 'none',
+        }} />
+        
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{
+            padding: '1.25rem 1.5rem',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
           }}>
-            {title}
-          </h4>
-          <span style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.7rem',
-            color: 'rgba(255, 255, 255, 0.4)',
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.04)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255, 255, 255, 0.5)',
+            }}>
+              {icons[icon]}
+            </div>
+            <div>
+              <h4 style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: 'rgba(255, 255, 255, 0.85)',
+                margin: 0,
+                letterSpacing: '-0.01em',
+              }}>
+                {title}
+              </h4>
+              <span style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                fontSize: '0.7rem',
+                color: 'rgba(255, 255, 255, 0.3)',
+              }}>
+                {subtitle}
+              </span>
+            </div>
+            <div style={{
+              marginLeft: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+            }}>
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  background: 'rgba(74, 222, 128, 0.7)',
+                }}
+              />
+              <span style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                color: 'rgba(74, 222, 128, 0.75)',
+                letterSpacing: '0.03em',
+              }}>
+                LIVE
+              </span>
+            </div>
+          </div>
+          <div style={{ 
+            padding: '1rem 1.5rem', 
+            height: '200px',
+            overflow: 'hidden',
           }}>
-            {subtitle}
-          </span>
+            {children}
+          </div>
         </div>
-        <div style={{
-          marginLeft: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-        }}>
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{
-              width: '5px',
-              height: '5px',
-              borderRadius: '50%',
-              background: 'rgba(74, 222, 128, 0.8)',
-              boxShadow: '0 0 8px rgba(74, 222, 128, 0.5)',
-            }}
-          />
-          <span style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.6rem',
-            color: 'rgba(74, 222, 128, 0.7)',
-          }}>
-            LIVE
-          </span>
-        </div>
-      </div>
-      <div style={{ 
-        padding: '1rem 1.5rem', 
-        height: '200px',
-        overflow: 'hidden',
-      }}>
-        {children}
       </div>
     </motion.div>
   );
 });
 
-const TweetItem = memo(function TweetItem({ tweet, isNew }) {
+const TweetItem = memo(forwardRef(function TweetItem({ tweet, isNew }, ref) {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       style={{
@@ -323,7 +328,7 @@ const TweetItem = memo(function TweetItem({ tweet, isNew }) {
       )}
     </motion.div>
   );
-});
+}));
 
 const AIChatDemo = memo(function AIChatDemo() {
   const [phase, setPhase] = useState('idle');
@@ -634,34 +639,36 @@ const LiveDemosSection = memo(function LiveDemosSection() {
         margin: '0 auto',
       }}
     >
-      <motion.div
-        initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5 }}
-        style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-        }}
-      >
-        <p style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.75rem',
-          color: 'rgba(255, 255, 255, 0.4)',
-          letterSpacing: '0.2em',
-          marginBottom: '1rem',
-        }}>
-          LIVE DATA FEEDS
-        </p>
-        <h2 style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.9)',
-          letterSpacing: '-0.02em',
-        }}>
-          See it in action.
-        </h2>
-      </motion.div>
+        <motion.div
+          initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          style={{
+            textAlign: 'center',
+            marginBottom: '3rem',
+          }}
+        >
+          <p style={{
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: '0.7rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.4)',
+            letterSpacing: '0.15em',
+            marginBottom: '0.75rem',
+            textTransform: 'uppercase',
+          }}>
+            Live Demos
+          </p>
+          <h2 style={{
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            fontSize: 'clamp(1.6rem, 4vw, 2rem)',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.85)',
+            letterSpacing: '-0.02em',
+          }}>
+            See it in <span style={{ color: 'rgba(147, 130, 255, 0.9)' }}>action</span>.
+          </h2>
+        </motion.div>
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',

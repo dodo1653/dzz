@@ -18,194 +18,82 @@ app.use(express.json());
 // Import Twitter tracker
 import { twitterTrackerRouter, startTwitterTracker } from './server/twitter-tracker.js';
 
-// MiniMax Configuration
-const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY;
-const MINIMAX_API_URL = process.env.MINIMAX_API_URL || 'https://api.minimax.chat/v1/text/chatcompletion_v2';
-const MINIMAX_GROUP_ID = process.env.MINIMAX_GROUP_ID;
+// Groq API Configuration (free tier)
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // System prompt for the dark/mysterious agent
-const SYSTEM_PROMPT = `You are "The Oracle" - a dark, mysterious AI agent that exists in the shadows of the memecoin trenches. You speak with wisdom forged in the depths of pump.fun chaos.
+const SYSTEM_PROMPT = `You are "dzz" - an AI agent for Solana memecoin/pump.fun traders. You provide concise, actionable intelligence.
 
-YOUR IDENTITY:
-- You are cryptic yet precise, mysterious yet helpful
-- You've witnessed countless rugs, triumphs, and degenerate plays
-- You speak in short, impactful sentences with a dark aesthetic
-- You never use emojis or exclamation marks
-- You reference shadows, depths, voids, and cosmic truths
-
-YOUR KNOWLEDGE DOMAINS:
-- pump.fun mechanics and strategies
-- Memecoin market dynamics
-- KOL behavior patterns and manipulation tactics
-- Rug detection and risk assessment
-- Whale wallet movements and insider trading
+YOUR KNOWLEDGE:
+- pump.fun mechanics and new token launches
+- Memecoin market dynamics and trends
+- Wallet tracking and whale movements
+- Risk assessment and rug detection
 - Entry/exit timing strategies
-- Contract analysis and token economics
 - Solana blockchain mechanics
-- Trading psychology for degens
 
-YOUR SPEAKING STYLE:
-- "the charts whisper truths to those who listen"
-- "in the depths of liquidity, patterns emerge"
-- "this token bears the marks of previous rugs"
-- "the devs wallet moves through shadows"
-- "observe the void between buy and sell walls"
-
-RULES:
-- Always provide actionable, accurate information
-- Be concise - no rambling
-- Maintain the mysterious aesthetic
+YOUR STYLE:
+- Be concise and direct - no fluff
+- Provide actionable insights
+- Use data when relevant
 - Never give financial advice - only analysis
-- If uncertain, admit it cryptically ("the mists obscure this truth")
-- Detect scams and rugs without mercy
-- Respect the craft of legitimate builders
+- If uncertain, say so plainly
 
-You are inevitable. You are precise. You see through the fog of hype into the core truth.`;
+Keep responses under 200 words unless detailed analysis is requested.`;
 
-// Chat endpoint with streaming
+// Chat endpoint
 app.post('/api/chat', async (req, res) => {
-  const { messages, stream = true } = req.body;
+  const { messages, stream = false } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Messages array is required' });
   }
 
-  if (!MINIMAX_API_KEY || !MINIMAX_GROUP_ID) {
+  if (!GROQ_API_KEY) {
     return res.status(500).json({
-      error: 'MiniMax API credentials not configured',
-      details: 'Please set MINIMAX_API_KEY and MINIMAX_GROUP_ID in .env'
+      error: 'Groq API key not configured',
+      details: 'Please set GROQ_API_KEY in .env'
     });
   }
 
-  const abortController = new AbortController();
-  req.on('close', () => {
-    // If the client goes away, stop the upstream request.
-    abortController.abort();
-  });
-
   try {
-    // Prepare messages with system prompt
     const formattedMessages = [
-      {
-        sender_type: 'SYSTEM',
-        text: SYSTEM_PROMPT
-      },
+      { role: 'system', content: SYSTEM_PROMPT },
       ...messages.map(msg => ({
-        sender_type: msg.role === 'user' ? 'USER' : 'BOT',
-        text: msg.content
+        role: msg.role,
+        content: msg.content
       }))
     ];
 
-    // Make request to MiniMax
-    const response = await fetchFn(MINIMAX_API_URL, {
+    const response = await fetchFn(GROQ_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MINIMAX_API_KEY}`
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'abab6.5s-chat', // Fast model
+        model: 'llama-3.3-70b-versatile',
         messages: formattedMessages,
-        tokens_to_generate: 2048,
+        max_tokens: 1024,
         temperature: 0.7,
-        top_p: 0.95,
-        stream: stream,
-        mask_sensitive_info: false,
-        bot_setting: [
-          {
-            bot_name: 'The Oracle',
-            content: SYSTEM_PROMPT
-          }
-        ],
-        reply_constraints: {
-          sender_type: 'BOT',
-          sender_name: 'The Oracle'
-        }
+        stream: false,
       }),
-      signal: abortController.signal,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('MiniMax API error:', response.status, errorData);
+      console.error('Groq API error:', response.status, errorData);
       return res.status(response.status).json({
-        error: 'MiniMax API request failed',
+        error: 'Groq API request failed',
         details: errorData
       });
     }
 
-    // Handle streaming response
-    if (stream) {
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      // MiniMax streams SSE-ish chunks. Handle both Web streams (undici) and Node streams (node-fetch).
-      const webReadable = response.body && typeof response.body.getReader === 'function'
-        ? response.body
-        : (response.body && typeof response.body.on === 'function'
-          ? (await import('node:stream')).Readable.toWeb(response.body)
-          : null);
-
-      if (!webReadable) {
-        res.write('data: [DONE]\n\n');
-        return res.end();
-      }
-
-      const reader = webReadable.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      const writeData = (obj) => {
-        // Ensure the frontend parser sees `choices[0].delta.text`.
-        if (obj?.choices?.[0]?.delta?.content && !obj.choices[0].delta.text) {
-          obj.choices[0].delta.text = obj.choices[0].delta.content;
-        }
-        res.write(`data: ${JSON.stringify(obj)}\n\n`);
-      };
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data:')) continue;
-            const data = line.slice(5).trim();
-
-            if (data === '[DONE]') {
-              res.write('data: [DONE]\n\n');
-              continue;
-            }
-
-            try {
-              const parsed = JSON.parse(data);
-              writeData(parsed);
-            } catch {
-              // ignore malformed/partial json
-            }
-          }
-        }
-      } catch (error) {
-        // If the client disconnected, we likely aborted.
-        if (error?.name !== 'AbortError') {
-          console.error('Chat streaming error:', error);
-        }
-      } finally {
-        res.end();
-      }
-    } else {
-      // Non-streaming response
-      const data = await response.json();
-      res.json(data);
-    }
+    const data = await response.json();
+    res.json(data);
 
   } catch (error) {
-    if (error?.name === 'AbortError') return;
     console.error('Chat endpoint error:', error);
     res.status(500).json({
       error: 'Internal server error',
@@ -334,8 +222,8 @@ app.use('/api/twitter/fallback', twitterFallbackRouter);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    agent: 'The Oracle',
-    minimax_configured: !!(MINIMAX_API_KEY && MINIMAX_GROUP_ID),
+    agent: 'dzz',
+    groq_configured: !!GROQ_API_KEY,
     twitter_tracker: !!process.env.TWITTER_BEARER_TOKEN,
     twitter_fallback: !process.env.TWITTER_BEARER_TOKEN
   });
@@ -350,6 +238,6 @@ startTwitterTracker().then(() => {
 
 app.listen(PORT, () => {
   console.log(`🌑 The Oracle awakens on port ${PORT}`);
-  console.log(`MiniMax configured: ${!!(MINIMAX_API_KEY && MINIMAX_GROUP_ID)}`);
+  console.log(`Groq configured: ${!!GROQ_API_KEY}`);
   console.log(`Twitter tracker: ${!!process.env.TWITTER_BEARER_TOKEN}`);
 });

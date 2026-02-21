@@ -81,8 +81,8 @@ const ContextEnginePage = memo(function ContextEnginePage() {
     const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    const rotateX = (e.clientY - centerY) / 30;
-    const rotateY = (e.clientX - centerX) / 30;
+    const rotateX = (e.clientY - centerY) / 55;
+    const rotateY = (e.clientX - centerX) / 55;
     setRotation({ x: -rotateX, y: rotateY });
   };
 
@@ -135,7 +135,7 @@ const ContextEnginePage = memo(function ContextEnginePage() {
       const assistantMessage = {
         id: Date.now() + 1,
         role: 'assistant',
-        content: data.choices?.[0]?.message?.content || data.response || data.message || 'I apologize, but I could not process that request.',
+        content: data.choices?.[0]?.message?.content || data.response || data.message || 'The mists obscure this truth. Try again.',
         timestamp: Date.now(),
         isTyping: true,
       };
@@ -184,8 +184,9 @@ const ContextEnginePage = memo(function ContextEnginePage() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: isMobile ? '6rem 1rem 2rem' : '8rem 2rem 2rem',
+      justifyContent: 'flex-start',
+      padding: isMobile ? '4rem 1rem 2rem' : '5rem 2rem 2rem',
+      paddingTop: isMobile ? '4rem' : '5.5rem',
     }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -233,24 +234,43 @@ const ContextEnginePage = memo(function ContextEnginePage() {
         onMouseLeave={handleMouseLeave}
         style={{
           width: '100%',
-          maxWidth: '600px',
-          background: 'rgba(8, 8, 14, 0.75)',
-          border: '1px solid rgba(255, 255, 255, 0.04)',
-          borderRadius: '22px',
-          backdropFilter: 'blur(40px)',
-          WebkitBackdropFilter: 'blur(40px)',
+          maxWidth: '900px',
+          background: 'linear-gradient(160deg, rgba(12, 12, 20, 0.92) 0%, rgba(8, 8, 16, 0.96) 50%, rgba(6, 6, 14, 0.95) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '24px',
+          backdropFilter: 'blur(50px)',
+          WebkitBackdropFilter: 'blur(50px)',
           overflow: 'hidden',
-          transform: `perspective(1000px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-          transition: 'transform 0.15s ease-out',
+          transform: `perspective(1200px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transition: 'transform 0.12s ease-out',
           boxShadow: `
             0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-            0 40px 100px -20px rgba(0, 0, 0, 0.7),
-            0 0 80px -40px rgba(123, 92, 246, 0.15)
+            0 80px 160px -40px rgba(0, 0, 0, 0.85),
+            0 0 100px -40px rgba(100, 100, 140, 0.08)
           `,
+          margin: '0 auto',
+          position: 'relative',
         }}
       >
+        {/* Subtle animated gradient overlay */}
+        <motion.div
+          animate={{
+            opacity: [0.02, 0.05, 0.02],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'radial-gradient(ellipse at 30% 20%, rgba(100, 100, 160, 0.1) 0%, transparent 50%)',
+            pointerEvents: 'none',
+          }}
+        />
         <div style={{
-          padding: '1.25rem 1.5rem',
+          padding: '1.5rem 2rem',
           borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
           display: 'flex',
           alignItems: 'center',
@@ -306,12 +326,12 @@ const ContextEnginePage = memo(function ContextEnginePage() {
         <div
           className="chat-messages-scroll"
           style={{
-            height: isMobile ? '340px' : '400px',
+            height: isMobile ? '420px' : '520px',
             overflowY: 'auto',
-            padding: '1.25rem 1.5rem',
+            padding: '1.75rem 2rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
+            gap: '1rem',
             scrollBehavior: 'smooth',
           }}
         >
@@ -346,18 +366,18 @@ const ContextEnginePage = memo(function ContextEnginePage() {
                   width: '100%',
                 }}
               >
-                <div style={{
-                  maxWidth: '85%',
-                  padding: '0.9rem 1.15rem',
-                  borderRadius: message.role === 'user' 
-                    ? '14px 14px 4px 14px' 
-                    : '14px 14px 14px 4px',
-                  background: message.role === 'user'
-                    ? 'rgba(255, 255, 255, 0.04)'
-                    : 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.03)',
-                  position: 'relative',
-                }}>
+                 <div style={{
+                    maxWidth: '85%',
+                    padding: '0.9rem 1.15rem',
+                    borderRadius: message.role === 'user' 
+                      ? '14px 14px 4px 14px' 
+                      : '14px 14px 14px 4px',
+                    background: message.role === 'user'
+                      ? 'rgba(255, 255, 255, 0.04)'
+                      : 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.03)',
+                    position: 'relative',
+                  }}>
                   {message.role === 'assistant' && (
                     <div style={{
                       position: 'absolute',
@@ -446,12 +466,12 @@ const ContextEnginePage = memo(function ContextEnginePage() {
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
           <div style={{
-            padding: '1rem 1.5rem',
+            padding: '1.25rem 2rem',
             borderTop: '1px solid rgba(255, 255, 255, 0.03)',
             display: 'flex',
-            gap: '0.75rem',
+            gap: '1rem',
           }}>
             <input
               ref={inputRef}

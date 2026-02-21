@@ -212,9 +212,7 @@ export default function App() {
                           title="dzz"
                           tagline="AI-powered pump.fun tracking. Never miss a launch."
                         >
-                          <TiltCard intensity={6}>
-                            <WalletCard />
-                          </TiltCard>
+                          <WalletCard />
                         </HeroSection>
                       </div>
 
