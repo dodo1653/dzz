@@ -78,6 +78,8 @@ const HolographicTerminal = memo(function HolographicTerminal({
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       style={{
         width: actualWidth,
         maxWidth: '600px',
@@ -102,17 +104,28 @@ const HolographicTerminal = memo(function HolographicTerminal({
             height: '100%',
             background: 'linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(5, 5, 15, 0.95))',
             borderRadius: '20px',
-            border: '1px solid rgba(123, 92, 246, 0.3)',
-            boxShadow: `
-              0 0 0 1px rgba(0, 240, 255, 0.1),
-              0 20px 50px rgba(0, 0, 0, 0.5),
-              0 0 100px rgba(123, 92, 246, 0.15),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `,
+            border: isHovered 
+              ? '1px solid rgba(100, 140, 180, 0.35)' 
+              : '1px solid rgba(123, 92, 246, 0.3)',
+            boxShadow: isHovered 
+              ? `0 0 0 1px rgba(100, 140, 180, 0.15), 0 28px 56px -20px rgba(0, 0, 0, 0.6), 0 0 50px rgba(100, 140, 180, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+              : `0 0 0 1px rgba(0, 240, 255, 0.1), 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(123, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
             overflow: 'hidden',
             backdropFilter: 'blur(20px)',
+            transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
+          <motion.div
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(135deg, rgba(100, 140, 180, 0.06) 0%, transparent 50%, rgba(140, 100, 180, 0.04) 100%)',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          />
           {!reducedMotion && (
             <>
               <div
@@ -173,9 +186,20 @@ const HolographicTerminal = memo(function HolographicTerminal({
               gap: '8px',
             }}
           >
-            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
-            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }} />
-            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }} />
+            <motion.div 
+              animate={isHovered ? { scale: 1.15 } : { scale: 1 }}
+              style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }}
+            />
+            <motion.div 
+              animate={isHovered ? { scale: 1.15 } : { scale: 1 }}
+              transition={{ delay: 0.02 }}
+              style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }}
+            />
+            <motion.div 
+              animate={isHovered ? { scale: 1.15 } : { scale: 1 }}
+              transition={{ delay: 0.04 }}
+              style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }}
+            />
             <span style={{
               marginLeft: 'auto',
               fontFamily: "'JetBrains Mono', monospace",

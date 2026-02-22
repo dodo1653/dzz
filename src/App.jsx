@@ -6,6 +6,7 @@ import TiltCard from "./components/TiltCard.jsx";
 import HeroSection from "./components/Hero/HeroSection.jsx";
 import LiveDemosSection from "./components/Hero/LiveDemosSection.jsx";
 import Navigation from "./components/Navigation.jsx";
+import CryptoTicker from "./components/CryptoTicker.jsx";
 import TwitterTracker from "./components/TwitterTracker.jsx";
 import ContactPage from "./components/ContactPage.jsx";
 import ContextEnginePage from "./components/ContextEnginePage.jsx";
@@ -186,6 +187,7 @@ export default function App() {
       <SolanaWalletProvider wallets={wallets} autoConnect={false}>
         <WalletModalProvider>
           <Navigation />
+          <CryptoTicker />
           <Layout>
             <div
               style={{
@@ -198,7 +200,7 @@ export default function App() {
                 opacity: mounted ? 1 : 0,
                 transform: mounted ? 'scale(1)' : 'scale(0.98)',
                 transition: mounted ? 'none' : 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                paddingTop: '4rem',
+                paddingTop: '6rem',
               }}
             >
               <main style={{ position: 'relative', zIndex: 100, width: '100%' }}>

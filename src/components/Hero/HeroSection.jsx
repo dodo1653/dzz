@@ -64,6 +64,7 @@ const HeroSection = memo(function HeroSection({
   const [titleComplete, setTitleComplete] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [expandedActivity, setExpandedActivity] = useState(null);
+  const [isActivityHovered, setIsActivityHovered] = useState(false);
   const containerRef = useRef(null);
   const activityRef = useRef(null);
   const headerRef = useRef(null);
@@ -99,6 +100,7 @@ const HeroSection = memo(function HeroSection({
   const handleActivityMouseLeave = () => {
     activityMouseX.set(0);
     activityMouseY.set(0);
+    setIsActivityHovered(false);
   };
 
   useEffect(() => {
@@ -478,10 +480,12 @@ const HeroSection = memo(function HeroSection({
                 <motion.div
                   ref={activityRef}
                   onMouseMove={handleActivityMouseMove}
+                  onMouseEnter={() => setIsActivityHovered(true)}
                   onMouseLeave={handleActivityMouseLeave}
                   initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     width: isMobile ? '340px' : '400px',
                     height: isMobile ? 320 : 380,
@@ -505,17 +509,29 @@ const HeroSection = memo(function HeroSection({
                         height: '100%',
                         background: 'linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(5, 5, 15, 0.95))',
                         borderRadius: '20px',
-                        border: '1px solid rgba(123, 92, 246, 0.3)',
-                        boxShadow: `
-                          0 0 0 1px rgba(0, 240, 255, 0.1),
-                          0 20px 50px rgba(0, 0, 0, 0.5),
-                          0 0 100px rgba(123, 92, 246, 0.15),
-                          inset 0 1px 0 rgba(255, 255, 255, 0.1)
-                        `,
+                        border: isActivityHovered 
+                          ? '1px solid rgba(100, 140, 180, 0.35)' 
+                          : '1px solid rgba(123, 92, 246, 0.3)',
+                        boxShadow: isActivityHovered 
+                          ? `0 0 0 1px rgba(100, 140, 180, 0.15), 0 28px 56px -20px rgba(0, 0, 0, 0.6), 0 0 50px rgba(100, 140, 180, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+                          : `0 0 0 1px rgba(0, 240, 255, 0.1), 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(123, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
                         overflow: 'hidden',
                         backdropFilter: 'blur(20px)',
+                        transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                       }}
                     >
+                      {/* Hover gradient overlay */}
+                      <motion.div
+                        animate={{ opacity: isActivityHovered ? 1 : 0 }}
+                        transition={{ duration: 0.4 }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'linear-gradient(135deg, rgba(100, 140, 180, 0.06) 0%, transparent 50%, rgba(140, 100, 180, 0.04) 100%)',
+                          pointerEvents: 'none',
+                          zIndex: 1,
+                        }}
+                      />
                       {/* Scanlines effect */}
                       {!reducedMotion && (
                         <>
@@ -526,6 +542,7 @@ const HeroSection = memo(function HeroSection({
                               background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.03) 2px, rgba(0, 240, 255, 0.03) 4px)',
                               pointerEvents: 'none',
                               animation: 'scanlines 8s linear infinite',
+                              zIndex: 2,
                             }}
                           />
                           <motion.div
@@ -539,6 +556,7 @@ const HeroSection = memo(function HeroSection({
                               height: '100%',
                               background: 'linear-gradient(180deg, rgba(0, 240, 255, 0.1) 0%, transparent 50%, rgba(123, 92, 246, 0.1) 100%)',
                               pointerEvents: 'none',
+                              zIndex: 2,
                             }}
                           />
                         </>
@@ -554,6 +572,7 @@ const HeroSection = memo(function HeroSection({
                           height: '2px',
                           background: 'linear-gradient(90deg, transparent, rgba(123, 92, 246, 0.8), rgba(0, 240, 255, 0.8), transparent)',
                           opacity: 0.8,
+                          zIndex: 3,
                         }}
                       />
 
@@ -571,11 +590,23 @@ const HeroSection = memo(function HeroSection({
                           alignItems: 'center',
                           padding: '0 16px',
                           gap: '8px',
+                          zIndex: 3,
                         }}
                       >
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }} />
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }} />
-                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }} />
+                        <motion.div 
+                          animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }}
+                        />
+                        <motion.div 
+                          animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
+                          transition={{ delay: 0.02 }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }}
+                        />
+                        <motion.div 
+                          animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
+                          transition={{ delay: 0.04 }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }}
+                        />
                         <motion.div
                           animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
@@ -591,8 +622,9 @@ const HeroSection = memo(function HeroSection({
                         <span style={{
                           fontFamily: "'JetBrains Mono', monospace",
                           fontSize: '11px',
-                          color: 'rgba(255, 255, 255, 0.4)',
+                          color: isActivityHovered ? 'rgba(255, 255, 255, 0.55)' : 'rgba(255, 255, 255, 0.4)',
                           letterSpacing: '0.1em',
+                          transition: 'color 0.3s ease',
                         }}>
                           LIVE ACTIVITY
                         </span>
@@ -607,6 +639,7 @@ const HeroSection = memo(function HeroSection({
                         bottom: 0,
                         padding: '16px 20px',
                         overflow: 'hidden',
+                        zIndex: 3,
                       }}>
                         {activityItems.map((item, i) => (
                           <motion.div

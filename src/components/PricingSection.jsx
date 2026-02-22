@@ -1,6 +1,39 @@
-import React, { useRef, useState, memo } from 'react';
+import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
+
+const TypingCharText = memo(function TypingCharText({ text, startDelay = 0, charDelay = 0.05 }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+  const inView = useInView(ref, { amount: 0.5 });
+
+  useEffect(() => {
+    if (inView) {
+      const timer = setTimeout(() => setVisible(true), startDelay * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [inView, startDelay]);
+
+  return (
+    <span ref={ref} style={{ display: 'inline-flex', overflow: 'hidden' }}>
+      {text.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
+          animate={visible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          transition={{
+            duration: 0.35,
+            delay: startDelay + i * charDelay,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          style={{ display: 'inline-block' }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+});
 
 const pricingFeatures = [
   'AI-powered KOL tracking',
@@ -207,34 +240,44 @@ const PricingSection = memo(function PricingSection() {
         transition={{ duration: 0.5 }}
         style={{ textAlign: 'center', marginBottom: '3.5rem' }}
       >
-        <p style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: '0.7rem',
-          fontWeight: 600,
-          color: 'rgba(255, 255, 255, 0.35)',
-          letterSpacing: '0.15em',
-          marginBottom: '1rem',
-          textTransform: 'uppercase',
-        }}>
-          Membership
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.58rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.35)',
+            letterSpacing: '0.25em',
+            marginBottom: '1rem',
+          }}
+        >
+          MEMBERSHIP
+        </motion.p>
         <h2 style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: 'clamp(2rem, 5vw, 2.75rem)',
-          fontWeight: 600,
-          color: 'rgba(255, 255, 255, 0.95)',
-          letterSpacing: '-0.03em',
+          fontFamily: "'Archivo', sans-serif",
+          fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
+          fontWeight: 500,
+          color: 'rgba(255, 255, 255, 0.88)',
+          letterSpacing: '-0.025em',
         }}>
-          Simple pricing.
+          <TypingCharText text="Simple pricing." startDelay={0.2} charDelay={0.04} />
         </h2>
-        <p style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: '1rem',
-          color: 'rgba(255, 255, 255, 0.45)',
-          marginTop: '0.75rem',
-        }}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.72rem',
+            color: 'rgba(255, 255, 255, 0.35)',
+            marginTop: '0.75rem',
+            letterSpacing: '0.02em',
+          }}
+        >
           Pay with SOL. Cancel anytime.
-        </p>
+        </motion.p>
       </motion.div>
 
       <motion.div

@@ -1,32 +1,14 @@
-import { useRef, useState, useEffect, memo, forwardRef } from 'react';
+import { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../../hooks/useReducedMotion';
 
 const mockTweets = [
-  { 
-    user: 'cented', 
-    name: 'cented',
-    text: 'Just deployed $DOGE2 on pump.fun', 
-    time: '2s', 
-    signal: true,
-  },
-  { 
-    user: 'saylor', 
-    name: 'Michael Saylor',
-    text: 'Bitcoin is the future. $BTC', 
-    time: '45s', 
-    signal: false,
-  },
-  { 
-    user: 'cobie', 
-    name: 'Cobie',
-    text: 'This one looks promising $WIF2', 
-    time: '2m', 
-    signal: true,
-  },
+  { user: 'cented', name: 'cented', text: 'Just deployed $DOGE2 on pump.fun', time: '2s', signal: true },
+  { user: 'saylor', name: 'Michael Saylor', text: 'Bitcoin is the future. $BTC', time: '45s', signal: false },
+  { user: 'cobie', name: 'Cobie', text: 'This one looks promising $WIF2', time: '2m', signal: true },
 ];
 
-const TypewriterText = memo(function TypewriterText({ text, speed = 25, onComplete }) {
+const TypewriterText = memo(function TypewriterText({ text, speed = 20 }) {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   
@@ -41,13 +23,12 @@ const TypewriterText = memo(function TypewriterText({ text, speed = 25, onComple
         index++;
       } else {
         setIsComplete(true);
-        onComplete?.();
         clearInterval(timer);
       }
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, speed, onComplete]);
+  }, [text, speed]);
 
   return (
     <span>
@@ -59,8 +40,8 @@ const TypewriterText = memo(function TypewriterText({ text, speed = 25, onComple
           style={{ 
             display: 'inline-block',
             width: '2px',
-            height: '0.9em',
-            background: 'rgba(255, 255, 255, 0.6)',
+            height: '0.85em',
+            background: 'rgba(255, 255, 255, 0.5)',
             marginLeft: '1px',
             verticalAlign: 'text-bottom',
           }}
@@ -81,263 +62,184 @@ const riskAnalysisSequence = [
   { type: 'result', score: 78, warnings: 1 },
 ];
 
-const InteractiveDemo = memo(function InteractiveDemo({
-  title,
-  subtitle,
-  icon,
-  children,
-  index,
-}) {
+const BrowserWindow = memo(function BrowserWindow({ title, url, children, index }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.3, once: false });
   const reducedMotion = useReducedMotion();
   const [isHovered, setIsHovered] = useState(false);
-
-  const icons = {
-    twitter: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-      </svg>
-    ),
-    shield: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z"/>
-        <path d="M9 12l2 2 4-4" strokeWidth="2"/>
-      </svg>
-    ),
-    brain: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-    ),
-  };
 
   return (
     <motion.div
       ref={ref}
       initial={reducedMotion ? {} : { opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6, scale: 1.01 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{
-        flex: 1,
-        minWidth: '300px',
-      }}
+      style={{ flex: 1, minWidth: '320px' }}
     >
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          background: 'rgba(8, 8, 14, 0.9)',
-          borderRadius: '20px',
-          border: isHovered 
-            ? '1px solid rgba(255, 255, 255, 0.08)' 
-            : '1px solid rgba(255, 255, 255, 0.04)',
-          boxShadow: isHovered 
-            ? '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.02) inset'
-            : '0 20px 50px -20px rgba(0, 0, 0, 0.5)',
-          overflow: 'hidden',
-          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-        }}
-      >
-        {/* Subtle gradient overlay */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        background: 'rgba(10, 10, 18, 0.95)',
+        borderRadius: '12px',
+        border: isHovered 
+          ? '1px solid rgba(100, 140, 180, 0.25)' 
+          : '1px solid rgba(255, 255, 255, 0.04)',
+        boxShadow: isHovered 
+          ? '0 0 0 1px rgba(100, 140, 180, 0.1), 0 28px 56px -20px rgba(0, 0, 0, 0.65), 0 0 40px rgba(100, 140, 180, 0.08)'
+          : '0 16px 40px -16px rgba(0, 0, 0, 0.5)',
+        overflow: 'hidden',
+        transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+      }}>
+        <motion.div
+          animate={{ opacity: isHovered ? 1 : 0 }}
+          transition={{ duration: 0.4 }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(100, 140, 180, 0.04) 0%, transparent 50%, rgba(140, 100, 180, 0.03) 100%)',
+            pointerEvents: 'none',
+            zIndex: 1,
+          }}
+        />
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.02) 0%, transparent 50%, rgba(0, 212, 255, 0.02) 100%)',
-          pointerEvents: 'none',
-        }} />
-        
-        <div style={{ position: 'relative', zIndex: 1 }}>
+          padding: '12px 16px',
+          background: 'rgba(0, 0, 0, 0.4)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          position: 'relative',
+          zIndex: 2,
+        }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <motion.div 
+              animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
+              style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f57' }}
+            />
+            <motion.div 
+              animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
+              transition={{ delay: 0.02 }}
+              style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ffbd2e' }}
+            />
+            <motion.div 
+              animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
+              transition={{ delay: 0.04 }}
+              style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#28ca41' }}
+            />
+          </div>
           <div style={{
-            padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+            flex: 1,
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
+            gap: '8px',
+            padding: '4px 12px',
+            background: isHovered ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.04)',
+            borderRadius: '6px',
+            marginLeft: '8px',
+            transition: 'background 0.3s ease',
           }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.04)',
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.6rem',
+              color: isHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.35)',
+              transition: 'color 0.3s ease',
+            }}>
+              {url}
+            </span>
+          </div>
+          <motion.div
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'rgba(255, 255, 255, 0.5)',
-            }}>
-              {icons[icon]}
-            </div>
-            <div>
-              <h4 style={{
-                fontFamily: "'Inter', -apple-system, sans-serif",
-                fontSize: '0.9rem',
-                fontWeight: 500,
-                color: 'rgba(255, 255, 255, 0.85)',
-                margin: 0,
-                letterSpacing: '-0.01em',
-              }}>
-                {title}
-              </h4>
-              <span style={{
-                fontFamily: "'Inter', -apple-system, sans-serif",
-                fontSize: '0.7rem',
-                color: 'rgba(255, 255, 255, 0.3)',
-              }}>
-                {subtitle}
-              </span>
-            </div>
-            <div style={{
-              marginLeft: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-            }}>
-              <motion.div
-                animate={{ scale: [1, 1.15, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                style={{
-                  width: '5px',
-                  height: '5px',
-                  borderRadius: '50%',
-                  background: 'rgba(74, 222, 128, 0.7)',
-                }}
-              />
-              <span style={{
-                fontFamily: "'Inter', -apple-system, sans-serif",
-                fontSize: '0.6rem',
-                fontWeight: 500,
-                color: 'rgba(74, 222, 128, 0.75)',
-                letterSpacing: '0.03em',
-              }}>
-                LIVE
-              </span>
-            </div>
-          </div>
-          <div style={{ 
-            padding: '1rem 1.5rem', 
-            height: '200px',
-            overflow: 'hidden',
-          }}>
-            {children}
-          </div>
+              gap: '4px',
+            }}
+          >
+            <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(74, 222, 128, 0.8)' }} />
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(74, 222, 128, 0.7)' }}>
+              LIVE
+            </span>
+          </motion.div>
+        </div>
+        <div style={{ padding: '16px', height: '220px', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
+          {children}
         </div>
       </div>
     </motion.div>
   );
 });
 
-const TweetItem = memo(forwardRef(function TweetItem({ tweet, isNew }, ref) {
+const TweetItem = memo(function TweetItem({ tweet, isNew }) {
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
       style={{
-        padding: '0.6rem 0.8rem',
-        background: isNew ? 'rgba(74, 222, 128, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-        border: `1px solid ${isNew ? 'rgba(74, 222, 128, 0.2)' : 'rgba(255, 255, 255, 0.04)'}`,
+        padding: '10px 12px',
+        background: isNew ? 'rgba(74, 222, 128, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+        border: isNew ? '1px solid rgba(74, 222, 128, 0.15)' : '1px solid rgba(255, 255, 255, 0.04)',
         borderRadius: '10px',
-        marginBottom: '0.4rem',
+        marginBottom: '8px',
       }}
     >
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        marginBottom: '0.3rem',
-      }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
         <div style={{
-          width: '20px',
-          height: '20px',
+          width: '24px',
+          height: '24px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, rgba(123,92,246,0.3), rgba(0,212,255,0.3))',
+          background: 'linear-gradient(135deg, rgba(100,100,140,0.4), rgba(80,80,120,0.3))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '0.5rem',
-          color: 'rgba(255,255,255,0.7)',
         }}>
-          @{tweet.user[0].toUpperCase()}
+          <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)' }}>
+            {tweet.user[0].toUpperCase()}
+          </span>
         </div>
-        <span style={{
-          fontFamily: "'Archivo', sans-serif",
-          fontSize: '0.75rem',
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.85)',
-        }}>
+        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.8)' }}>
           {tweet.name}
         </span>
-        <span style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.6rem',
-          color: 'rgba(255, 255, 255, 0.3)',
-        }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.3)' }}>
           @{tweet.user}
         </span>
-        <span style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.55rem',
-          color: 'rgba(255, 255, 255, 0.25)',
-          marginLeft: 'auto',
-        }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255, 255, 255, 0.25)', marginLeft: 'auto' }}>
           {tweet.time}
         </span>
       </div>
-      <p style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.7rem',
-        color: 'rgba(255, 255, 255, 0.6)',
-        margin: 0,
-        lineHeight: 1.4,
-      }}>
+      <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.55)', margin: 0, lineHeight: 1.4 }}>
         {tweet.text}
       </p>
       {tweet.signal && (
-        <div style={{
-          marginTop: '0.3rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.25rem',
-        }}>
+        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <motion.div
-            animate={{ opacity: [0.5, 1, 0.5] }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            style={{
-              width: '3px',
-              height: '3px',
-              borderRadius: '50%',
-              background: 'rgba(74, 222, 128, 0.8)',
-            }}
+            style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(74, 222, 128, 0.8)' }}
           />
-          <span style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.55rem',
-            color: 'rgba(74, 222, 128, 0.7)',
-          }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(74, 222, 128, 0.7)' }}>
             SIGNAL DETECTED
           </span>
         </div>
       )}
     </motion.div>
   );
-}));
+});
 
 const AIChatDemo = memo(function AIChatDemo() {
   const [phase, setPhase] = useState('idle');
   const [userText, setUserText] = useState('');
   const [showAiResponse, setShowAiResponse] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const containerRef = useRef(null);
   
-  const userQuestion = "explain to me cented's exact trading patterns";
+  const userQuestion = "explain cented's trading patterns";
   
   useEffect(() => {
     const runSequence = async () => {
@@ -346,25 +248,21 @@ const AIChatDemo = memo(function AIChatDemo() {
       setShowAiResponse(false);
       setIsTyping(false);
       
-      await new Promise(r => setTimeout(r, 800));
-      
+      await new Promise(r => setTimeout(r, 600));
       setPhase('typing');
       
       for (let i = 0; i < userQuestion.length; i++) {
-        await new Promise(r => setTimeout(r, 40 + Math.random() * 40));
+        await new Promise(r => setTimeout(r, 35 + Math.random() * 35));
         setUserText(userQuestion.slice(0, i + 1));
       }
       
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 400));
       setPhase('sent');
-      
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 200));
       setIsTyping(true);
-      
-      await new Promise(r => setTimeout(r, 1500));
+      await new Promise(r => setTimeout(r, 1200));
       setIsTyping(false);
       setShowAiResponse(true);
-      
       setPhase('complete');
     };
     
@@ -372,76 +270,29 @@ const AIChatDemo = memo(function AIChatDemo() {
   }, []);
   
   return (
-    <div 
-      ref={containerRef}
-      style={{ 
-        position: 'relative',
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '0.6rem',
-        height: '100%',
-      }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
           alignSelf: 'flex-end',
-          maxWidth: '85%',
-          padding: '0.55rem 0.8rem',
-          borderRadius: '10px 10px 4px 10px',
+          maxWidth: '80%',
+          padding: '10px 14px',
+          borderRadius: '12px 12px 4px 12px',
           background: 'rgba(255, 255, 255, 0.06)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-          position: 'relative',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
         }}
       >
-        <p style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.65rem',
-          color: 'rgba(255, 255, 255, 0.7)',
-          margin: 0,
-          lineHeight: 1.5,
-        }}>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.65)', margin: 0, lineHeight: 1.5 }}>
           {userText}
           {phase === 'typing' && (
             <motion.span
               animate={{ opacity: [1, 0] }}
               transition={{ duration: 0.4, repeat: Infinity }}
-              style={{ 
-                display: 'inline-block',
-                width: '2px',
-                height: '0.9em',
-                background: 'rgba(255, 255, 255, 0.6)',
-                marginLeft: '1px',
-              }}
+              style={{ display: 'inline-block', width: '2px', height: '0.85em', background: 'rgba(255, 255, 255, 0.5)', marginLeft: '1px' }}
             />
           )}
         </p>
-        
-        {phase === 'typing' && (
-          <motion.div
-            initial={false}
-            animate={{ 
-              x: [0, 1, -1, 0],
-              y: [0, -1, 1, 0],
-            }}
-            transition={{ duration: 0.3, repeat: Infinity }}
-            style={{
-              position: 'absolute',
-              right: '-8px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
-            }}
-          >
-            <svg width="12" height="16" viewBox="0 0 12 16" fill="none">
-              <path 
-                d="M0 0v12l3-3h6l3 3V0" 
-                fill="rgba(255,255,255,0.8)"
-              />
-            </svg>
-          </motion.div>
-        )}
       </motion.div>
       
       {isTyping && (
@@ -451,24 +302,18 @@ const AIChatDemo = memo(function AIChatDemo() {
           style={{
             alignSelf: 'flex-start',
             display: 'flex',
-            gap: '3px',
-            padding: '0.4rem 0.6rem',
+            gap: '4px',
+            padding: '8px 12px',
             background: 'rgba(255, 255, 255, 0.02)',
             borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.04)',
           }}
         >
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              animate={{ opacity: [0.3, 0.8, 0.3], y: [0, -2, 0] }}
-              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
-              style={{
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.5)',
-              }}
+              animate={{ opacity: [0.3, 0.7, 0.3], y: [0, -2, 0] }}
+              transition={{ duration: 1, repeat: Infinity, delay: i * 0.12 }}
+              style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.4)' }}
             />
           ))}
         </motion.div>
@@ -476,25 +321,19 @@ const AIChatDemo = memo(function AIChatDemo() {
       
       {showAiResponse && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
             alignSelf: 'flex-start',
-            maxWidth: '90%',
-            padding: '0.55rem 0.8rem',
-            borderRadius: '10px 10px 10px 4px',
+            maxWidth: '88%',
+            padding: '10px 14px',
+            borderRadius: '12px 12px 12px 4px',
             background: 'rgba(255, 255, 255, 0.02)',
             border: '1px solid rgba(255, 255, 255, 0.04)',
           }}
         >
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.65rem',
-            color: 'rgba(255, 255, 255, 0.7)',
-            margin: 0,
-            lineHeight: 1.5,
-          }}>
-            <TypewriterText text={aiResponseText} speed={18} />
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.62rem', color: 'rgba(255, 255, 255, 0.6)', margin: 0, lineHeight: 1.5 }}>
+            <TypewriterText text={aiResponseText} speed={16} />
           </p>
         </motion.div>
       )}
@@ -516,13 +355,13 @@ const RiskScannerDemo = memo(function RiskScannerDemo() {
         
         if (item.type === 'scan') {
           setChecks([{ text: item.text, scanning: true }]);
-          await new Promise(r => setTimeout(r, 600));
+          await new Promise(r => setTimeout(r, 500));
         } else if (item.type === 'check') {
           setChecks(prev => [
             ...prev.filter(c => !c.scanning),
             { text: item.text, success: item.success, complete: true }
           ]);
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 400));
         } else if (item.type === 'result') {
           setShowResult(true);
         }
@@ -533,49 +372,36 @@ const RiskScannerDemo = memo(function RiskScannerDemo() {
   }, []);
   
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', height: '100%' }}>
       <AnimatePresence mode="popLayout">
         {checks.map((check, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.35rem 0.5rem',
+              gap: '8px',
+              padding: '8px 10px',
               background: check.complete 
-                ? (check.success ? 'rgba(74, 222, 128, 0.06)' : 'rgba(255, 193, 7, 0.06)')
+                ? (check.success ? 'rgba(74, 222, 128, 0.05)' : 'rgba(255, 180, 100, 0.05)')
                 : 'rgba(255, 255, 255, 0.02)',
-              borderRadius: '6px',
+              borderRadius: '8px',
             }}
           >
             {check.scanning ? (
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                style={{
-                  width: '10px',
-                  height: '10px',
-                  border: '1.5px solid rgba(255,255,255,0.2)',
-                  borderTopColor: 'rgba(255,255,255,0.6)',
-                  borderRadius: '50%',
-                }}
+                style={{ width: '10px', height: '10px', border: '1.5px solid rgba(255,255,255,0.15)', borderTopColor: 'rgba(255,255,255,0.5)', borderRadius: '50%' }}
               />
             ) : (
-              <span style={{
-                color: check.success ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 193, 7, 0.8)',
-                fontSize: '0.6rem',
-              }}>
+              <span style={{ color: check.success ? 'rgba(74, 222, 128, 0.75)' : 'rgba(255, 180, 100, 0.75)', fontSize: '0.6rem' }}>
                 {check.success ? '✓' : '⚠'}
               </span>
             )}
-            <span style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '0.6rem',
-              color: 'rgba(255, 255, 255, 0.5)',
-            }}>
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem', color: 'rgba(255, 255, 255, 0.5)' }}>
               {check.text}
             </span>
           </motion.div>
@@ -584,28 +410,18 @@ const RiskScannerDemo = memo(function RiskScannerDemo() {
       
       {showResult && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           style={{
             marginTop: 'auto',
-            padding: '0.75rem',
-            background: 'rgba(255, 255, 255, 0.03)',
+            padding: '14px',
+            background: 'rgba(255, 255, 255, 0.02)',
             borderRadius: '10px',
             textAlign: 'center',
           }}
         >
-          <div style={{
-            fontFamily: "'Archivo', sans-serif",
-            fontSize: '1.5rem',
-            fontWeight: 600,
-            color: 'rgba(255, 193, 7, 0.9)',
-          }}>78</div>
-          <div style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.55rem',
-            color: 'rgba(255, 255, 255, 0.4)',
-            letterSpacing: '0.1em',
-          }}>RISK SCORE</div>
+          <div style={{ fontFamily: "'Archivo', sans-serif", fontSize: '1.6rem', fontWeight: 500, color: 'rgba(255, 180, 100, 0.85)' }}>78</div>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.5rem', color: 'rgba(255, 255, 255, 0.35)', letterSpacing: '0.12em' }}>RISK SCORE</div>
         </motion.div>
       )}
     </div>
@@ -639,69 +455,61 @@ const LiveDemosSection = memo(function LiveDemosSection() {
         margin: '0 auto',
       }}
     >
-        <motion.div
-          initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
+      <motion.div
+        initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5 }}
+        style={{ textAlign: 'center', marginBottom: '3rem' }}
+      >
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.1 }}
           style={{
-            textAlign: 'center',
-            marginBottom: '3rem',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.55rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.3)',
+            letterSpacing: '0.28em',
+            marginBottom: '1rem',
           }}
         >
-          <p style={{
-            fontFamily: "'Inter', -apple-system, sans-serif",
-            fontSize: '0.7rem',
-            fontWeight: 500,
-            color: 'rgba(255, 255, 255, 0.4)',
-            letterSpacing: '0.15em',
-            marginBottom: '0.75rem',
-            textTransform: 'uppercase',
-          }}>
-            Live Demos
-          </p>
-          <h2 style={{
-            fontFamily: "'Inter', -apple-system, sans-serif",
+          LIVE DEMOS
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.15 }}
+          style={{
+            fontFamily: "'Archivo', sans-serif",
             fontSize: 'clamp(1.6rem, 4vw, 2rem)',
             fontWeight: 500,
             color: 'rgba(255, 255, 255, 0.85)',
             letterSpacing: '-0.02em',
-          }}>
-            See it in <span style={{ color: 'rgba(147, 130, 255, 0.9)' }}>action</span>.
-          </h2>
-        </motion.div>
+          }}
+        >
+          See it in <span style={{ color: 'rgba(160, 200, 255, 0.9)' }}>action</span>.
+        </motion.h2>
+      </motion.div>
+      
       <div style={{
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
-        gap: '1.5rem',
+        gap: '1.25rem',
       }}>
-        <InteractiveDemo
-          title="Twitter Tracker"
-          subtitle="Real-time KOL signals"
-          icon="twitter"
-          index={0}
-        >
+        <BrowserWindow title="Twitter Tracker" url="dzz.io/tracker" index={0}>
           <AnimatePresence mode="popLayout">
             {tweets.map((tweet, i) => (
               <TweetItem key={tweet.id || i} tweet={tweet} isNew={i === 0 && tweet.id} />
             ))}
           </AnimatePresence>
-        </InteractiveDemo>
-        <InteractiveDemo
-          title="Context Engine"
-          subtitle="AI-powered analysis"
-          icon="brain"
-          index={1}
-        >
+        </BrowserWindow>
+        <BrowserWindow title="Context Engine" url="dzz.io/engine" index={1}>
           <AIChatDemo />
-        </InteractiveDemo>
-        <InteractiveDemo
-          title="Risk Scanner"
-          subtitle="Contract analysis"
-          icon="shield"
-          index={2}
-        >
+        </BrowserWindow>
+        <BrowserWindow title="Risk Scanner" url="dzz.io/scanner" index={2}>
           <RiskScannerDemo />
-        </InteractiveDemo>
+        </BrowserWindow>
       </div>
     </section>
   );

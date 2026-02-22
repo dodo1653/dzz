@@ -2,35 +2,37 @@ import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
 
-const TypingCharText = memo(function TypingCharText({ text, delay = 0, charDelay = 0.04 }) {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.5 });
-
-  useEffect(() => {
-    if (inView) {
-      const timer = setTimeout(() => setVisible(true), delay * 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [inView, delay]);
-
+const AnimatedHeading = memo(function AnimatedHeading({ text, highlightWord, isInView }) {
+  const words = text.split(' ');
+  const highlightIndex = words.indexOf(highlightWord);
+  
   return (
-    <span ref={ref} style={{ display: 'inline-flex', overflow: 'hidden' }}>
-      {text.split('').map((char, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
-          animate={visible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
-          transition={{
-            duration: 0.4,
-            delay: delay + i * charDelay,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          style={{ display: 'inline-block' }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </motion.span>
-      ))}
+    <span style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.3em' }}>
+      {words.map((word, wordIdx) => {
+        const isHighlight = wordIdx === highlightIndex;
+        return (
+          <span key={wordIdx} style={{ display: 'inline-flex', overflow: 'hidden' }}>
+            {word.split('').map((char, charIdx) => (
+              <motion.span
+                key={charIdx}
+                initial={{ opacity: 0, y: 30, filter: 'blur(12px)' }}
+                animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.2 + (wordIdx * 0.15) + (charIdx * 0.04),
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                style={{ 
+                  display: 'inline-block',
+                  color: isHighlight ? 'rgba(74, 222, 128, 0.9)' : 'rgba(255, 255, 255, 0.88)',
+                }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </span>
+        );
+      })}
     </span>
   );
 });
@@ -61,7 +63,7 @@ const GlassDot = memo(function GlassDot({ isActive, onClick, label }) {
           : '1px solid rgba(255,255,255,0.1)',
         boxShadow: isActive 
           ? '0 0 25px rgba(74, 222, 128, 0.4), inset 0 1px 1px rgba(255,255,255,0.2)'
-          : '0 0 15px rgba(255,255,255,0.08)',
+          : '0 0 15px rgba(255, 255, 255, 0.08)',
         cursor: 'pointer',
         transition: reducedMotion ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: isHovered ? 'scale(1.15)' : 'scale(1)',
@@ -142,105 +144,129 @@ const ScrollNavigationDots = memo(function ScrollNavigationDots({ sections, acti
   );
 });
 
+const iconColors = {
+  radar: 'rgba(120, 180, 255, 0.85)',
+  shield: 'rgba(74, 222, 128, 0.85)',
+  pulse: 'rgba(255, 160, 120, 0.85)',
+  rocket: 'rgba(180, 140, 255, 0.85)',
+  brain: 'rgba(140, 200, 220, 0.85)',
+  chart: 'rgba(255, 200, 100, 0.85)',
+};
+
 const icons = {
   radar: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M12 2a10 10 0 0 1 10 10" />
-      <path d="M12 6a6 6 0 0 1 6 6" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a10 10 0 0 1 10 10"/>
+      <circle cx="12" cy="12" r="6"/>
+      <circle cx="12" cy="12" r="2"/>
     </svg>
   ),
   shield: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
-      <path d="M9 12l2 2 4-4" strokeWidth="2" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="M9 12l2 2 4-4"/>
     </svg>
   ),
   pulse: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
     </svg>
   ),
   rocket: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-      <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+      <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
     </svg>
   ),
   brain: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   ),
   chart: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <polyline points="7 14 10 10 13 13 17 8" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
     </svg>
   ),
 };
 
 const FeatureCard = memo(function FeatureCard({ feature }) {
   const [isHovered, setIsHovered] = useState(false);
+  const iconColor = iconColors[feature.icon] || 'rgba(255, 255, 255, 0.6)';
   
   return (
     <motion.div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       style={{
         flexShrink: 0,
-        width: '260px',
-        padding: '1.25rem',
-        background: isHovered ? 'rgba(14, 14, 24, 0.95)' : 'rgba(10, 10, 18, 0.9)',
-        borderRadius: '4px',
-        border: isHovered ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.04)',
+        width: '320px',
+        padding: '24px',
+        background: isHovered 
+          ? 'linear-gradient(165deg, rgba(18, 18, 28, 0.98) 0%, rgba(12, 12, 20, 0.98) 100%)'
+          : 'linear-gradient(165deg, rgba(14, 14, 24, 0.92) 0%, rgba(10, 10, 18, 0.95) 100%)',
+        borderRadius: '16px',
+        border: isHovered 
+          ? '1px solid rgba(255, 255, 255, 0.08)' 
+          : '1px solid rgba(255, 255, 255, 0.04)',
         boxShadow: isHovered 
-          ? '0 20px 40px -15px rgba(0, 0, 0, 0.5)'
-          : '0 8px 20px -10px rgba(0, 0, 0, 0.4)',
-        cursor: 'pointer',
+          ? '0 24px 48px -16px rgba(0, 0, 0, 0.5)'
+          : '0 12px 32px -12px rgba(0, 0, 0, 0.4)',
+        cursor: 'default',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div style={{
         display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        marginBottom: '0.7rem',
+        alignItems: 'flex-start',
+        gap: '16px',
+        marginBottom: '14px',
       }}>
         <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '4px',
-          background: feature.gradient,
+          width: '40px',
+          height: '40px',
+          borderRadius: '10px',
+          background: `linear-gradient(135deg, ${iconColor.replace('0.85', '0.15')} 0%, ${iconColor.replace('0.85', '0.05')} 100%)`,
+          border: `1px solid ${iconColor.replace('0.85', '0.2')}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: 'rgba(255, 255, 255, 0.85)',
+          color: iconColor,
+          flexShrink: 0,
         }}>
           {icons[feature.icon]}
         </div>
-        <h3 style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: '0.85rem',
-          fontWeight: 500,
-          color: isHovered ? 'rgba(255, 255, 255, 0.85)' : 'rgba(255, 255, 255, 0.6)',
-          margin: 0,
-        }}>
-          {feature.title}
-        </h3>
+        <div style={{ flex: 1 }}>
+          <h3 style={{
+            fontFamily: "'Archivo', sans-serif",
+            fontSize: '0.95rem',
+            fontWeight: 500,
+            color: isHovered ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.75)',
+            margin: 0,
+            marginBottom: '8px',
+            letterSpacing: '-0.01em',
+            transition: 'color 0.2s ease',
+          }}>
+            {feature.title}
+          </h3>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.68rem',
+            color: 'rgba(255, 255, 255, 0.38)',
+            lineHeight: 1.6,
+            margin: 0,
+            letterSpacing: '0.01em',
+          }}>
+            {feature.description}
+          </p>
+        </div>
       </div>
-      <p style={{
-        fontFamily: "'Inter', -apple-system, sans-serif",
-        fontSize: '0.8rem',
-        color: 'rgba(255, 255, 255, 0.4)',
-        lineHeight: 1.55,
-        margin: 0,
-      }}>
-        {feature.description}
-      </p>
     </motion.div>
   );
 });
@@ -270,45 +296,40 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
         transition={{ duration: 0.5 }}
         style={{
           textAlign: 'center',
-          marginBottom: '3rem',
+          marginBottom: '3.5rem',
           maxWidth: '1100px',
           marginLeft: 'auto',
           marginRight: 'auto',
           padding: isMobile ? '0 1.5rem' : '0 2rem',
         }}
       >
-        <p style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: '0.7rem',
-          fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.4)',
-          letterSpacing: '0.15em',
-          marginBottom: '0.75rem',
-          textTransform: 'uppercase',
-        }}>
-          Your Arsenal
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: '0.55rem',
+            fontWeight: 500,
+            color: 'rgba(255, 255, 255, 0.3)',
+            letterSpacing: '0.3em',
+            marginBottom: '1.25rem',
+          }}
+        >
+          YOUR ARSENAL
+        </motion.p>
         <h2 style={{
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          fontSize: 'clamp(1.6rem, 4vw, 2rem)',
+          fontFamily: "'Archivo', sans-serif",
+          fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
           fontWeight: 500,
-          color: 'rgba(255, 255, 255, 0.85)',
+          color: 'rgba(255, 255, 255, 0.88)',
           letterSpacing: '-0.02em',
         }}>
-          <TypingCharText text="Every tool you " delay={0.2} charDelay={0.05} />
-          <span style={{ color: 'rgba(130, 255, 180, 0.85)' }}>
-            <TypingCharText text="need" delay={0.95} charDelay={0.05} />
-          </span>
-          <TypingCharText text="." delay={1.15} charDelay={0.05} />
+          <AnimatedHeading text="Every tool you need." highlightWord="need." isInView={isInView} />
         </h2>
       </motion.div>
       
-      <div
-        style={{
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
         <div
           className="features-scroll-container"
           style={{
@@ -316,54 +337,40 @@ const PremiumFeatureSection = memo(function PremiumFeatureSection({ features }) 
             gap: '1rem',
             padding: isMobile ? '0 1.5rem' : '0 2rem',
             width: 'max-content',
-            animation: reducedMotion || isMobile ? 'none' : 'scroll-features 25s linear infinite',
+            animation: reducedMotion || isMobile ? 'none' : 'scroll-features 30s linear infinite',
           }}
         >
           {allFeatures.map((feature, idx) => (
-            <FeatureCard
-              key={idx}
-              feature={feature}
-            />
+            <FeatureCard key={idx} feature={feature} />
           ))}
         </div>
         
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: '150px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: '150px',
-            background: 'linear-gradient(-90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
-            pointerEvents: 'none',
-          }}
-        />
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '120px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: '120px',
+          background: 'linear-gradient(-90deg, transparent 0%, rgba(8, 8, 14, 1) 100%)',
+          pointerEvents: 'none',
+        }} />
       </div>
 
       <style>{`
         @keyframes scroll-features {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-${features.length * 290}px);
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-${features.length * 340}px); }
         }
-        
-        .features-scroll-container:hover {
-          animation-play-state: paused;
-        }
+        .features-scroll-container:hover { animation-play-state: paused; }
       `}</style>
     </section>
   );
