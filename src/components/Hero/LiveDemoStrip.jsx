@@ -48,10 +48,10 @@ const MiniTwitterFeed = memo(function MiniTwitterFeed() {
             transition={{ duration: 0.3, delay: i * 0.05 }}
             style={{
               background: tweet.id === newTweet?.id 
-                ? 'rgba(123, 92, 246, 0.15)' 
+                ? 'rgba(80, 100, 140, 0.1)' 
                 : 'rgba(255, 255, 255, 0.03)',
               border: tweet.id === newTweet?.id 
-                ? '1px solid rgba(123, 92, 246, 0.4)' 
+                ? '1px solid rgba(100, 130, 170, 0.25)' 
                 : '1px solid rgba(255, 255, 255, 0.05)',
               borderRadius: '8px',
               padding: '8px 10px',
@@ -68,7 +68,7 @@ const MiniTwitterFeed = memo(function MiniTwitterFeed() {
                 fontFamily: 'var(--font-body)',
                 fontSize: '10px',
                 fontWeight: 600,
-                color: 'var(--color-accent-cyan)',
+                color: 'rgba(100, 130, 170, 0.7)',
               }}>@{tweet.user}</span>
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
@@ -295,9 +295,9 @@ const LiveDemoStrip = memo(function LiveDemoStrip() {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const demos = [
-    { title: 'TWITTER TRACKER', component: MiniTwitterFeed, color: 'rgba(123, 92, 246, 0.9)' },
-    { title: 'RISK SCANNER', component: MiniRiskScanner, color: 'rgba(0, 212, 255, 0.9)' },
-    { title: 'PUMP.FUN FEED', component: MiniPumpFeed, color: 'rgba(236, 72, 153, 0.9)' },
+    { title: 'TWITTER TRACKER', component: MiniTwitterFeed, color: 'rgba(100, 130, 170, 0.7)' },
+    { title: 'RISK SCANNER', component: MiniRiskScanner, color: 'rgba(80, 100, 140, 0.7)' },
+    { title: 'PUMP.FUN FEED', component: MiniPumpFeed, color: 'rgba(90, 110, 150, 0.7)' },
   ];
 
   return (

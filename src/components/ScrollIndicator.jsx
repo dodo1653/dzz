@@ -25,10 +25,10 @@ const ScrollIndicator = () => {
           left: 0,
           right: 0,
           height: '3px',
-          background: 'linear-gradient(90deg, #7b5cf6, #00d4ff)',
+          background: 'linear-gradient(90deg, rgba(80, 100, 140, 0.6), rgba(60, 80, 120, 0.6))',
           transformOrigin: '0%',
           zIndex: 9999,
-          boxShadow: '0 0 10px rgba(123, 92, 246, 0.5)',
+          boxShadow: '0 0 10px rgba(60, 80, 120, 0.3)',
         }}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: scrollProgress / 100 }}
@@ -57,14 +57,14 @@ const ScrollIndicator = () => {
             width: '50px',
             height: '50px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7b5cf6, #00d4ff)',
-            border: 'none',
+            background: 'linear-gradient(135deg, rgba(60, 80, 120, 0.8), rgba(40, 60, 100, 0.8))',
+            border: '1px solid rgba(100, 130, 170, 0.3)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 9998,
-            boxShadow: '0 8px 24px rgba(123, 92, 246, 0.4)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
             backdropFilter: 'blur(10px)',
           }}
         >

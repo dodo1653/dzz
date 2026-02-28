@@ -106,10 +106,10 @@ const HolographicTerminal = memo(function HolographicTerminal({
             borderRadius: '20px',
             border: isHovered 
               ? '1px solid rgba(100, 140, 180, 0.35)' 
-              : '1px solid rgba(123, 92, 246, 0.3)',
+              : '1px solid rgba(80, 100, 140, 0.25)',
             boxShadow: isHovered 
               ? `0 0 0 1px rgba(100, 140, 180, 0.15), 0 28px 56px -20px rgba(0, 0, 0, 0.6), 0 0 50px rgba(100, 140, 180, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1)`
-              : `0 0 0 1px rgba(0, 240, 255, 0.1), 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(123, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+              : `0 0 0 1px rgba(80, 100, 140, 0.08), 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 50px rgba(60, 80, 120, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
             overflow: 'hidden',
             backdropFilter: 'blur(20px)',
             transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
@@ -132,7 +132,7 @@ const HolographicTerminal = memo(function HolographicTerminal({
                 style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.03) 2px, rgba(0, 240, 255, 0.03) 4px)',
+                  background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(80, 100, 140, 0.03) 2px, rgba(80, 100, 140, 0.03) 4px)',
                   pointerEvents: 'none',
                   animation: 'scanlines 8s linear infinite',
                 }}
@@ -152,7 +152,7 @@ const HolographicTerminal = memo(function HolographicTerminal({
                   left: 0,
                   right: 0,
                   height: '100%',
-                  background: 'linear-gradient(180deg, rgba(0, 240, 255, 0.1) 0%, transparent 50%, rgba(123, 92, 246, 0.1) 100%)',
+                  background: 'linear-gradient(180deg, rgba(80, 100, 140, 0.06) 0%, transparent 50%, rgba(60, 80, 120, 0.04) 100%)',
                   pointerEvents: 'none',
                 }}
               />
@@ -166,7 +166,7 @@ const HolographicTerminal = memo(function HolographicTerminal({
               left: 0,
               right: 0,
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, rgba(123, 92, 246, 0.8), rgba(0, 240, 255, 0.8), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(80, 100, 140, 0.5), rgba(60, 80, 120, 0.5), transparent)',
               opacity: 0.8,
             }}
           />
@@ -229,7 +229,7 @@ const HolographicTerminal = memo(function HolographicTerminal({
                     key={index}
                     style={{
                       height: '1px',
-                      background: 'linear-gradient(90deg, transparent, rgba(123, 92, 246, 0.3), transparent)',
+                      background: 'linear-gradient(90deg, transparent, rgba(80, 100, 140, 0.2), transparent)',
                       margin: '12px 0',
                     }}
                   />
@@ -251,9 +251,9 @@ const HolographicTerminal = memo(function HolographicTerminal({
                   >
                     <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{line.label}:</span>
                     <span style={{
-                      color: line.color || 'rgba(0, 240, 255, 0.9)',
+                      color: line.color || 'rgba(100, 130, 170, 0.8)',
                       fontWeight: 500,
-                      textShadow: `0 0 10px ${line.color || 'rgba(0, 240, 255, 0.9)'}`,
+                      textShadow: `0 0 10px ${line.color || 'rgba(80, 100, 140, 0.5)'}`,
                     }}>
                       {line.value}{line.suffix}
                     </span>
