@@ -4,7 +4,6 @@ import Layout from "./components/Layout.jsx";
 import WalletCard from "./components/WalletCard.jsx";
 import TiltCard from "./components/TiltCard.jsx";
 import HeroSection from "./components/Hero/HeroSection.jsx";
-import LiveDemosSection from "./components/Hero/LiveDemosSection.jsx";
 import Navigation from "./components/Navigation.jsx";
 import CryptoTicker from "./components/CryptoTicker.jsx";
 import TwitterTracker from "./components/TwitterTracker.jsx";
@@ -212,14 +211,9 @@ export default function App() {
                       <div id="hero">
                         <HeroSection
                           title="dzz"
-                          tagline="AI-powered pump.fun tracking. Never miss a launch."
                         >
                           <WalletCard />
                         </HeroSection>
-                      </div>
-
-                      <div id="demos">
-                        <LiveDemosSection />
                       </div>
 
                       <PremiumFeatureSection features={features} />
