@@ -9,7 +9,7 @@ const Navigation = () => {
 
   const navLinks = [
     { name: 'terminal', path: '/' },
-    { name: 'context', path: '/context-engine' },
+    { name: 'context engine', path: '/context-engine' },
     { name: 'twitter', path: '/twitter-tracker' },
     { name: 'contact', path: '/contact' },
   ];
