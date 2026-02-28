@@ -135,16 +135,6 @@ const PricingCard = memo(function PricingCard() {
                 boxShadow: '0 0 8px rgba(80, 110, 150, 0.4)',
               }}
             />
-            <p style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: '0.65rem',
-              fontWeight: 500,
-              color: 'rgba(100, 130, 170, 0.9)',
-              letterSpacing: '0.12em',
-              margin: 0,
-            }}>
-              PRO ACCESS
-            </p>
           </div>
         </motion.div>
 
