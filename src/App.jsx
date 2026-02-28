@@ -210,15 +210,15 @@ export default function App() {
                       <ScrollNavigationDots sections={scrollSections} />
                       
                       <div id="hero">
-                        <LiveDemosSection />
-                      </div>
-
-                      <div id="demos">
                         <HeroSection
                           title="dzz"
                         >
                           <WalletCard />
                         </HeroSection>
+                      </div>
+
+                      <div id="demos">
+                        <LiveDemosSection />
                       </div>
 
                       <PremiumFeatureSection features={features} />
