@@ -212,13 +212,10 @@ export default function App() {
                       <div id="hero">
                         <HeroSection
                           title="dzz"
+                          middleContent={<LiveDemosSection />}
                         >
                           <WalletCard />
                         </HeroSection>
-                      </div>
-
-                      <div id="demos">
-                        <LiveDemosSection />
                       </div>
 
                       <PremiumFeatureSection features={features} />

@@ -59,6 +59,7 @@ const HeroSection = function HeroSection({
   title = "AI DEGEN RADAR",
   onTitleRevealComplete,
   children,
+  middleContent,
 }) {
   const [titleComplete, setTitleComplete] = useState(false);
   const [showContent, setShowContent] = useState(false);
@@ -315,6 +316,9 @@ const HeroSection = function HeroSection({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Middle Content (LiveDemosSection) */}
+        {middleContent}
 
         {/* Terminal + Activity Panel */}
         <AnimatePresence>
