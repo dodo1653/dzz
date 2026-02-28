@@ -12,8 +12,8 @@ const ComingSoonBadge = memo(function ComingSoonBadge() {
         alignItems: 'center',
         gap: '0.5rem',
         padding: '0.5rem 1rem',
-        background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.15) 0%, rgba(0, 212, 255, 0.1) 100%)',
-        border: '1px solid rgba(123, 92, 246, 0.3)',
+        background: 'linear-gradient(135deg, rgba(80, 100, 140, 0.12) 0%, rgba(60, 80, 120, 0.08) 100%)',
+        border: '1px solid rgba(100, 130, 170, 0.2)',
         borderRadius: '100px',
         marginBottom: '1.5rem',
       }}
@@ -25,15 +25,15 @@ const ComingSoonBadge = memo(function ComingSoonBadge() {
           width: '6px',
           height: '6px',
           borderRadius: '50%',
-          background: 'rgba(123, 92, 246, 0.8)',
-          boxShadow: '0 0 10px rgba(123, 92, 246, 0.5)',
+          background: 'rgba(100, 130, 170, 0.6)',
+          boxShadow: '0 0 10px rgba(80, 100, 140, 0.3)',
         }}
       />
       <span style={{
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: '0.7rem',
         fontWeight: 500,
-        color: 'rgba(123, 92, 246, 0.9)',
+        color: 'rgba(120, 150, 190, 0.8)',
         letterSpacing: '0.1em',
       }}>
         COMING SOON
@@ -203,8 +203,8 @@ const TwitterTracker = memo(function TwitterTracker() {
         right: 0,
         bottom: 0,
         background: `
-          radial-gradient(ellipse at 30% 20%, rgba(123, 92, 246, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 70% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%)
+          radial-gradient(ellipse at 30% 20%, rgba(60, 80, 120, 0.06) 0%, transparent 50%),
+          radial-gradient(ellipse at 70% 80%, rgba(40, 60, 100, 0.04) 0%, transparent 50%)
         `,
         pointerEvents: 'none',
         zIndex: 0,
@@ -273,7 +273,7 @@ const TwitterTracker = memo(function TwitterTracker() {
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.03) 0%, transparent 50%)',
+          background: 'linear-gradient(135deg, rgba(60, 80, 120, 0.03) 0%, transparent 50%)',
           pointerEvents: 'none',
           zIndex: 1,
         }} />
@@ -286,7 +286,7 @@ const TwitterTracker = memo(function TwitterTracker() {
             left: 0,
             right: 0,
             height: '100px',
-            background: 'linear-gradient(180deg, transparent 0%, rgba(123, 92, 246, 0.1) 50%, transparent 100%)',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(60, 80, 120, 0.08) 50%, transparent 100%)',
             pointerEvents: 'none',
             zIndex: 2,
           }}
@@ -301,12 +301,12 @@ const TwitterTracker = memo(function TwitterTracker() {
               height: '80px',
               margin: '0 auto 1.5rem',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.15) 0%, rgba(0, 212, 255, 0.1) 100%)',
-              border: '1px solid rgba(123, 92, 246, 0.25)',
+              background: 'linear-gradient(135deg, rgba(80, 100, 140, 0.12) 0%, rgba(60, 80, 120, 0.08) 100%)',
+              border: '1px solid rgba(100, 130, 170, 0.2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'rgba(123, 92, 246, 0.6)',
+              color: 'rgba(100, 130, 170, 0.5)',
             }}
           >
             <LockIcon />
@@ -399,8 +399,8 @@ const TwitterTracker = memo(function TwitterTracker() {
                   type="submit"
                   style={{
                     padding: '0.85rem 1.5rem',
-                    background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.2) 0%, rgba(0, 212, 255, 0.15) 100%)',
-                    border: '1px solid rgba(123, 92, 246, 0.3)',
+                    background: 'linear-gradient(135deg, rgba(80, 100, 140, 0.15) 0%, rgba(60, 80, 120, 0.1) 100%)',
+                    border: '1px solid rgba(100, 130, 170, 0.25)',
                     borderRadius: '12px',
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: '0.75rem',
@@ -410,10 +410,10 @@ const TwitterTracker = memo(function TwitterTracker() {
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(123, 92, 246, 0.3) 0%, rgba(0, 212, 255, 0.2) 100%)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(80, 100, 140, 0.25) 0%, rgba(60, 80, 120, 0.15) 100%)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(123, 92, 246, 0.2) 0%, rgba(0, 212, 255, 0.15) 100%)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(80, 100, 140, 0.15) 0%, rgba(60, 80, 120, 0.1) 100%)';
                   }}
                 >
                   NOTIFY ME
@@ -428,7 +428,7 @@ const TwitterTracker = memo(function TwitterTracker() {
           inset: -1,
           borderRadius: '25px',
           border: '1px solid transparent',
-          background: 'linear-gradient(135deg, rgba(123, 92, 246, 0.2), transparent, rgba(0, 212, 255, 0.15))',
+          background: 'linear-gradient(135deg, rgba(80, 100, 140, 0.15), transparent, rgba(60, 80, 120, 0.1))',
           backgroundClip: 'padding-box',
           WebkitBackgroundClip: 'padding-box',
           pointerEvents: 'none',
