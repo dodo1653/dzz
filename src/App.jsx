@@ -4,6 +4,7 @@ import Layout from "./components/Layout.jsx";
 import WalletCard from "./components/WalletCard.jsx";
 import TiltCard from "./components/TiltCard.jsx";
 import HeroSection from "./components/Hero/HeroSection.jsx";
+import LiveDemosSection from "./components/Hero/LiveDemosSection.jsx";
 import Navigation from "./components/Navigation.jsx";
 import CryptoTicker from "./components/CryptoTicker.jsx";
 import TwitterTracker from "./components/TwitterTracker.jsx";
@@ -209,6 +210,10 @@ export default function App() {
                       <ScrollNavigationDots sections={scrollSections} />
                       
                       <div id="hero">
+                        <LiveDemosSection />
+                      </div>
+
+                      <div id="demos">
                         <HeroSection
                           title="dzz"
                         >
