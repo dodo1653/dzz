@@ -209,16 +209,16 @@ export default function App() {
                     <div className="animate-fadeInSlow">
                       <ScrollNavigationDots sections={scrollSections} />
                       
-                      <div id="demos">
-                        <LiveDemosSection />
-                      </div>
-
                       <div id="hero">
                         <HeroSection
                           title="dzz"
                         >
                           <WalletCard />
                         </HeroSection>
+                      </div>
+
+                      <div id="demos">
+                        <LiveDemosSection />
                       </div>
 
                       <PremiumFeatureSection features={features} />
