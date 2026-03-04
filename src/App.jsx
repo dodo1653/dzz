@@ -10,6 +10,7 @@ import CryptoTicker from "./components/CryptoTicker.jsx";
 import TwitterTracker from "./components/TwitterTracker.jsx";
 import ContactPage from "./components/ContactPage.jsx";
 import ContextEnginePage from "./components/ContextEnginePage.jsx";
+import TopDevelopersPage from "./components/TopDevelopersPage.jsx";
 import { ScrollNavigationDots, PremiumFeatureSection } from "./components/ScrollNavigation.jsx";
 import Footer from "./components/Footer.jsx";
 import PricingSection from "./components/PricingSection.jsx";
@@ -226,6 +227,11 @@ export default function App() {
                   <Route path="/twitter-tracker" element={
                     <div className="animate-fadeInSlow">
                       <TwitterTracker />
+                    </div>
+                  } />
+                  <Route path="/top-developers" element={
+                    <div className="animate-fadeInSlow">
+                      <TopDevelopersPage />
                     </div>
                   } />
                   <Route path="/context-engine" element={
