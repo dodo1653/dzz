@@ -47,8 +47,15 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
   }, [activeFilter]);
 
   const formatVolume = (vol) => {
-    if (typeof vol === 'string') return vol;
-    if (typeof vol === 'number') return `${vol.toFixed(2)} SOL`;
+    if (typeof vol === 'string') {
+      const num = parseFloat(vol);
+      if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+      return `${num.toFixed(2)} SOL`;
+    }
+    if (typeof vol === 'number') {
+      if (vol >= 1000) return `${(vol / 1000).toFixed(1)}K`;
+      return `${vol.toFixed(2)} SOL`;
+    }
     return '0 SOL';
   };
 
@@ -288,7 +295,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                           }}>
                             {dev.name}
                           </span>
-                          {dev.hasMigrations && (
+                          {dev.hasEnoughMigrations && (
                             <span style={{
                               padding: '0.1rem 0.35rem',
                               background: 'rgba(74, 222, 128, 0.15)',
@@ -297,7 +304,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                               fontSize: '0.5rem',
                               color: 'rgba(74, 222, 128, 0.8)',
                             }}>
-                              MIGRATED
+                              {dev.migrationRate} MIGRATED
                             </span>
                           )}
                         </div>
@@ -306,7 +313,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                           fontSize: '0.6rem',
                           color: 'rgba(255, 255, 255, 0.3)',
                         }}>
-                          {dev.totalDeployments} deployed · {dev.migratedTokens} migrated
+                          {dev.totalDeployments} deployed · {dev.migrationRate} migrated
                         </span>
                       </div>
 
@@ -484,7 +491,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                     <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left' }}>RANK</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>DEVELOPER</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>DEPLOYED</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>MIGRATED</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>MIGRATION</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>24H VOLUME</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>WIN RATE</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>STATUS</th>
@@ -522,19 +529,24 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                         <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.totalDeployments}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: dev.migratedTokens > 0 ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 255, 255, 0.4)' }}>{dev.migratedTokens}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: parseFloat(dev.migrationRate) >= 20 ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 255, 255, 0.4)' }}>{dev.migrationRate}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{formatVolume(dev.volume24h)}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: parseFloat(dev.volume24h) >= 15000 ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 255, 255, 0.4)' }}>{formatVolume(dev.volume24h)}</span>
+                      </td>
+                      <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: dev.hasEnoughMigrations ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 255, 255, 0.4)' }}>{dev.migratedTokens}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
                         <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(74, 222, 128, 0.8)' }}>{dev.winRate}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        {dev.hasMigrations && dev.has24hVolume ? (
+                        {dev.hasEnoughMigrations && dev.hasEnoughVolume24h ? (
                           <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(74, 222, 128, 0.15)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(74, 222, 128, 0.8)' }}>ACTIVE</span>
-                        ) : dev.hasMigrations ? (
+                        ) : dev.hasEnoughMigrations ? (
                           <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(255, 193, 7, 0.15)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 193, 7, 0.8)' }}>MIGRATED</span>
+                        ) : dev.hasEnoughVolume24h ? (
+                          <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(0, 212, 255, 0.15)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(0, 212, 255, 0.8)' }}>VOLUME</span>
                         ) : (
                           <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.3)' }}>NEW</span>
                         )}

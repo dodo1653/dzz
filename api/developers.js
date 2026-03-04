@@ -242,10 +242,16 @@ async function indexRecentTransactions() {
 function calculateDeveloperStats() {
   const devs = [];
   const now = Date.now();
+  const MIN_VOLUME = 15000;
+  const MIN_MIGRATION_RATE = 20;
   
   for (const [address, dev] of developers) {
-    const hasMigrations = dev.migratedTokens > 0;
-    const has24hVolume = dev.volume24h > 1;
+    const migrationRate = dev.totalDeployments > 0 
+      ? (dev.migratedTokens / dev.totalDeployments) * 100 
+      : 0;
+    
+    const hasEnoughMigrations = migrationRate >= MIN_MIGRATION_RATE;
+    const hasEnoughVolume = dev.volume24h >= MIN_VOLUME;
     
     const winRate = dev.totalDeployments > 0 
       ? Math.round((dev.wins / dev.totalDeployments) * 100) 
@@ -256,12 +262,14 @@ function calculateDeveloperStats() {
       name: `${address.slice(0, 6)}...${address.slice(-4)}`,
       totalDeployments: dev.totalDeployments,
       migratedTokens: dev.migratedTokens,
+      migrationRate: `${migrationRate.toFixed(0)}%`,
       totalVolume: dev.totalVolume.toFixed(2),
       volume24h: dev.volume24h.toFixed(2),
       wins: dev.wins,
       winRate: `${winRate}%`,
-      hasMigrations,
-      has24hVolume,
+      hasEnoughMigrations,
+      hasEnoughVolume,
+      hasEnoughVolume24h: hasEnoughVolume,
       lastActive: getRelativeTime(dev.lastActive),
       score: calculateScore(dev),
     });
@@ -316,14 +324,25 @@ export default async function handler(req, res) {
     await indexRecentTransactions();
     
     const { filter } = req.query;
+    const MIN_VOLUME = 15000;
+    const MIN_MIGRATION_RATE = 20;
+    
     let developers_data = calculateDeveloperStats();
     
     if (filter === 'migrations') {
-      developers_data = developers_data.filter(d => d.hasMigrations);
+      developers_data = developers_data.filter(d => parseFloat(d.migrationRate) >= MIN_MIGRATION_RATE);
     } else if (filter === 'volume') {
-      developers_data = developers_data.filter(d => d.has24hVolume);
+      developers_data = developers_data.filter(d => d.volume24h >= MIN_VOLUME);
     } else if (filter === 'active') {
-      developers_data = developers_data.filter(d => d.hasMigrations && d.has24hVolume);
+      developers_data = developers_data.filter(d => 
+        d.hasEnoughMigrations && parseFloat(d.migrationRate) >= MIN_MIGRATION_RATE && 
+        d.hasEnoughVolume24h && parseFloat(d.volume24h) >= MIN_VOLUME
+      );
+    } else {
+      developers_data = developers_data.filter(d => 
+        (d.hasEnoughMigrations && parseFloat(d.migrationRate) >= MIN_MIGRATION_RATE) || 
+        (d.hasEnoughVolume24h && parseFloat(d.volume24h) >= MIN_VOLUME)
+      );
     }
     
     const limit = parseInt(req.query.limit) || 20;
