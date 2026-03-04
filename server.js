@@ -218,6 +218,70 @@ app.use('/api/twitter', twitterTrackerRouter);
 import { twitterFallbackRouter } from './server/twitter-fallback.js';
 app.use('/api/twitter/fallback', twitterFallbackRouter);
 
+// Pump.fun Developer Indexer
+import pumpfunIndexer from './server/pumpfun-indexer.js';
+
+app.get('/api/developers', async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const developers = pumpfunIndexer.getTopDevelopers(parseInt(limit));
+    res.json({
+      success: true,
+      data: developers,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('Error fetching developers:', error);
+    res.status(500).json({ error: 'Failed to fetch developers' });
+  }
+});
+
+app.get('/api/developers/recent', async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    const tokens = pumpfunIndexer.getRecentTokens(parseInt(limit));
+    res.json({
+      success: true,
+      data: tokens,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('Error fetching recent tokens:', error);
+    res.status(500).json({ error: 'Failed to fetch recent tokens' });
+  }
+});
+
+app.get('/api/developers/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const developers = pumpfunIndexer.getTopDevelopers(100);
+    const developer = developers.find(d => d.address === address);
+    
+    if (!developer) {
+      return res.status(404).json({ error: 'Developer not found' });
+    }
+    
+    res.json({
+      success: true,
+      data: developer,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('Error fetching developer:', error);
+    res.status(500).json({ error: 'Failed to fetch developer' });
+  }
+});
+
+app.post('/api/developers/refresh', async (req, res) => {
+  try {
+    await pumpfunIndexer.indexRecentTransactions();
+    res.json({ success: true, message: 'Index refreshed' });
+  } catch (error) {
+    console.error('Error refreshing index:', error);
+    res.status(500).json({ error: 'Failed to refresh index' });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -234,6 +298,13 @@ startTwitterTracker().then(() => {
   console.log('✅ Twitter tracker initialized');
 }).catch(error => {
   console.error('❌ Error initializing Twitter tracker:', error);
+});
+
+// Start the pump.fun indexer
+pumpfunIndexer.startIndexing(30000).then(() => {
+  console.log('✅ Pump.fun developer indexer started');
+}).catch(error => {
+  console.error('❌ Error starting pump.fun indexer:', error);
 });
 
 app.listen(PORT, () => {
