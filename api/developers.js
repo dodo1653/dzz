@@ -27,7 +27,7 @@ async function getTransactionsForProgram(limit = 100) {
     );
     return signatures;
   } catch (error) {
-    console.error('Error fetching pump.fun transactions:', error);
+    console.error('Error fetching transactions:', error);
     return [];
   }
 }
@@ -45,36 +45,79 @@ async function getTransactionDetails(signature) {
   }
 }
 
-function parseTokenCreation(tx, signature) {
+function parsePumpFunTransaction(tx, signature) {
   try {
     if (!tx || !tx.meta || !tx.transaction) return null;
 
+    const logMessages = tx.meta.logMessages || [];
     const instructions = tx.transaction.message.instructions || [];
+    
+    let type = 'unknown';
     let creator = null;
     let tokenMint = null;
     let solAmount = 0;
+    let tokenAmount = 0;
+
+    for (const msg of logMessages) {
+      if (msg.includes('Migrate') || msg.includes('migrate')) {
+        type = 'migrate';
+      } else if (msg.includes('Create') && msg.includes('mint')) {
+        type = 'create';
+      } else if (msg.includes('Buy') || msg.includes('buy')) {
+        type = 'buy';
+      } else if (msg.includes('Sell') || msg.includes('sell')) {
+        type = 'sell';
+      }
+    }
 
     for (const ix of instructions) {
-      if (ix.parsed) {
+      if (ix.parsed && ix.parsed.type) {
+        const info = ix.parsed.info || {};
+        
         if (ix.parsed.type === 'create' || ix.parsed.type === 'createAccount') {
-          if (ix.parsed.info?.mint) tokenMint = ix.parsed.info.mint;
-          if (ix.parsed.info?.source) creator = ix.parsed.info.source;
+          if (info.mint) tokenMint = info.mint;
+          if (info.source) creator = info.source;
         }
-        if (ix.parsed.info?.lamports) {
-          solAmount = ix.parsed.info.lamports / 1e9;
+        
+        if (info.lamports) {
+          solAmount = info.lamports / 1e9;
+        }
+        
+        if (info.tokenAmount || info.amount) {
+          tokenAmount = parseFloat(info.tokenAmount || info.amount) / 1e6;
         }
       }
     }
 
-    if (!creator || !tokenMint) return null;
+    const createIx = instructions.find(ix => 
+      ix && ix.parsed && (ix.parsed.type === 'create' || ix.parsed.type === 'initializeMint2')
+    );
+    if (createIx && createIx.parsed?.info) {
+      tokenMint = createIx.parsed.info.mint || createIx.parsed.info.account;
+      creator = createIx.parsed.info.source || createIx.parsed.info.payer;
+    }
+
+    if (!creator && info?.mint) {
+      creator = info.mint;
+    }
+
+    if (!creator && logMessages.length > 0) {
+      const createLog = logMessages.find(l => l.includes('Created mint'));
+      if (createLog) {
+        const match = createLog.match(/([A-HJ-NP-Za-km-z]{32,44})/);
+        if (match) tokenMint = match[0];
+      }
+    }
 
     return {
       signature,
       slot: tx.slot,
       timestamp: tx.blockTime,
+      type,
       creator,
       tokenMint,
       solAmount,
+      tokenAmount,
     };
   } catch (error) {
     return null;
@@ -85,7 +128,7 @@ async function indexRecentTransactions() {
   if (isIndexing) return;
   
   const now = Date.now();
-  if (now - lastIndexTime < 30000) return;
+  if (now - lastIndexTime < 15000) return;
   
   isIndexing = true;
 
@@ -96,42 +139,99 @@ async function indexRecentTransactions() {
       if (sigInfo.slot <= lastProcessedSlot) continue;
 
       const tx = await getTransactionDetails(sigInfo.signature);
-      const creation = parseTokenCreation(tx, sigInfo.signature);
+      const parsed = parsePumpFunTransaction(tx, sigInfo.signature);
 
-      if (creation) {
-        tokens.set(creation.tokenMint, {
-          ...creation,
-          status: 'active',
-          currentMarketCap: 0,
-          buyers: 0,
-          volume: 0
-        });
+      if (!parsed) continue;
 
-        if (!developers.has(creation.creator)) {
-          developers.set(creation.creator, {
-            address: creation.creator,
-            name: `${creation.creator.slice(0, 4)}...${creation.creator.slice(-4)}`,
+      if (parsed.type === 'create' && parsed.creator && parsed.tokenMint) {
+        if (!developers.has(parsed.creator)) {
+          developers.set(parsed.creator, {
+            address: parsed.creator,
             tokens: [],
             totalDeployments: 0,
+            migratedTokens: 0,
             totalVolume: 0,
+            volume24h: 0,
             wins: 0,
-            losses: 0,
-            totalPnl: 0,
             lastActive: Date.now()
           });
         }
 
-        const dev = developers.get(creation.creator);
-        dev.tokens.push(creation.tokenMint);
-        dev.totalDeployments++;
-        dev.totalVolume += creation.solAmount;
+        const dev = developers.get(parsed.creator);
+        
+        if (!dev.tokens.includes(parsed.tokenMint)) {
+          dev.tokens.push(parsed.tokenMint);
+          dev.totalDeployments++;
+        }
+        
+        dev.totalVolume += parsed.solAmount || 0;
+        dev.volume24h += parsed.solAmount || 0;
         dev.lastActive = Date.now();
+
+        if (!tokens.has(parsed.tokenMint)) {
+          tokens.set(parsed.tokenMint, {
+            mint: parsed.tokenMint,
+            creator: parsed.creator,
+            createdAt: now,
+            lastVolume: parsed.solAmount || 0,
+            volume24h: parsed.solAmount || 0,
+            migrated: false,
+            migrationPercent: 0,
+            marketCap: 0,
+            athMarketCap: 0,
+          });
+        }
+
+        const token = tokens.get(parsed.tokenMint);
+        token.lastVolume += parsed.solAmount || 0;
+        token.volume24h += parsed.solAmount || 0;
+      }
+
+      if (parsed.type === 'migrate' && parsed.tokenMint) {
+        const token = tokens.get(parsed.tokenMint);
+        if (token) {
+          token.migrated = true;
+          token.migrationPercent = 100;
+          
+          const dev = developers.get(token.creator);
+          if (dev) {
+            dev.migratedTokens++;
+            dev.wins++;
+          }
+        }
+      }
+
+      if (['buy', 'sell'].includes(parsed.type) && parsed.tokenMint) {
+        const token = tokens.get(parsed.tokenMint);
+        if (token) {
+          token.volume24h += parsed.solAmount || 0;
+          
+          const dev = developers.get(token.creator);
+          if (dev) {
+            dev.volume24h += parsed.solAmount || 0;
+          }
+        }
       }
 
       lastProcessedSlot = sigInfo.slot;
     }
     
     lastIndexTime = Date.now();
+    
+    for (const [addr, dev] of developers) {
+      const dayAgo = now - (24 * 60 * 60 * 1000);
+      if (dev.lastActive < dayAgo) {
+        dev.volume24h = dev.volume24h * 0.1;
+      }
+    }
+    
+    for (const [mint, token] of tokens) {
+      const dayAgo = now - (24 * 60 * 60 * 1000);
+      if (token.createdAt < dayAgo) {
+        token.volume24h = token.volume24h * 0.1;
+      }
+    }
+    
   } catch (error) {
     console.error('Indexing error:', error);
   } finally {
@@ -141,36 +241,42 @@ async function indexRecentTransactions() {
 
 function calculateDeveloperStats() {
   const devs = [];
+  const now = Date.now();
   
   for (const [address, dev] of developers) {
-    const todayTokens = dev.tokens.length;
-    const todayVolume = dev.totalVolume;
+    const hasMigrations = dev.migratedTokens > 0;
+    const has24hVolume = dev.volume24h > 1;
+    
     const winRate = dev.totalDeployments > 0 
       ? Math.round((dev.wins / dev.totalDeployments) * 100) 
-      : 0;
-    
-    const totalPnl = dev.totalPnl;
-    const pnlPercent = todayVolume > 0 
-      ? Math.round((totalPnl / todayVolume) * 100) 
       : 0;
 
     devs.push({
       address,
-      name: dev.name,
-      todayTokens,
-      todayVolume: `${todayVolume.toFixed(2)} SOL`,
-      todayWins: dev.wins,
+      name: `${address.slice(0, 6)}...${address.slice(-4)}`,
+      totalDeployments: dev.totalDeployments,
+      migratedTokens: dev.migratedTokens,
+      totalVolume: dev.totalVolume.toFixed(2),
+      volume24h: dev.volume24h.toFixed(2),
+      wins: dev.wins,
       winRate: `${winRate}%`,
-      totalPnl: `${totalPnl.toFixed(2)} SOL`,
-      pnlPercent: `${pnlPercent}%`,
+      hasMigrations,
+      has24hVolume,
       lastActive: getRelativeTime(dev.lastActive),
-      trend: totalPnl > 0 ? 'up' : 'down'
+      score: calculateScore(dev),
     });
   }
 
-  return devs.sort((a, b) => 
-    parseFloat(b.totalPnl) - parseFloat(a.totalPnl)
-  );
+  return devs.sort((a, b) => b.score - a.score);
+}
+
+function calculateScore(dev) {
+  let score = 0;
+  score += dev.migratedTokens * 100;
+  score += dev.wins * 50;
+  score += dev.volume24h * 10;
+  score += dev.totalDeployments * 5;
+  return score;
 }
 
 function getRelativeTime(timestamp) {
@@ -182,9 +288,24 @@ function getRelativeTime(timestamp) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+function getTopTokens(limit = 10) {
+  return Array.from(tokens.values())
+    .filter(t => t.volume24h > 0.5 || t.migrated)
+    .sort((a, b) => b.volume24h - a.volume24h)
+    .slice(0, limit)
+    .map(t => ({
+      mint: t.mint,
+      creator: `${t.creator?.slice(0, 6)}...${t.creator?.slice(-4)}`,
+      volume24h: t.volume24h.toFixed(2),
+      migrated: t.migrated,
+      migrationPercent: t.migrationPercent,
+      createdAt: getRelativeTime(t.createdAt),
+    }));
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -194,12 +315,31 @@ export default async function handler(req, res) {
   try {
     await indexRecentTransactions();
     
+    const { filter } = req.query;
+    let developers_data = calculateDeveloperStats();
+    
+    if (filter === 'migrations') {
+      developers_data = developers_data.filter(d => d.hasMigrations);
+    } else if (filter === 'volume') {
+      developers_data = developers_data.filter(d => d.has24hVolume);
+    } else if (filter === 'active') {
+      developers_data = developers_data.filter(d => d.hasMigrations && d.has24hVolume);
+    }
+    
     const limit = parseInt(req.query.limit) || 20;
-    const developers_data = calculateDeveloperStats().slice(0, limit);
+    developers_data = developers_data.slice(0, limit);
+    
+    const topTokens = getTopTokens(10);
     
     res.json({
       success: true,
       data: developers_data,
+      topTokens,
+      stats: {
+        totalDevelopers: developers.size,
+        totalTokens: tokens.size,
+        lastUpdated: new Date().toISOString(),
+      },
       timestamp: Date.now()
     });
   } catch (error) {

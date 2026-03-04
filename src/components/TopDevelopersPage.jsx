@@ -8,31 +8,27 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [developers, setDevelopers] = useState([]);
-  const [recentWins, setRecentWins] = useState([]);
+  const [topTokens, setTopTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const fetchData = async () => {
     try {
       setLoading(true);
       
-      const devsRes = await fetch('/api/developers?limit=20');
-      const devsData = await devsRes.json();
+      const filterParam = activeFilter !== 'all' ? `&filter=${activeFilter}` : '';
+      const res = await fetch(`/api/developers?limit=20${filterParam}`);
+      const data = await res.json();
       
-      if (devsData.success) {
-        const devsWithAvatars = devsData.data.map((dev, i) => ({
+      if (data.success) {
+        const devsWithAvatars = data.data.map((dev, i) => ({
           ...dev,
           avatar: avatars[i % avatars.length],
           rank: i + 1
         }));
         setDevelopers(devsWithAvatars);
-      }
-      
-      const recentRes = await fetch('/api/developers-recent?limit=10');
-      const recentData = await recentRes.json();
-      
-      if (recentData.success) {
-        setRecentWins(recentData.data);
+        setTopTokens(data.topTokens || []);
       }
       
       setError(null);
@@ -46,21 +42,22 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
 
   useEffect(() => {
     fetchData();
-    
-    const interval = setInterval(fetchData, 60000);
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  const formatAddress = (addr) => {
-    if (!addr) return 'Unknown';
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
+  }, [activeFilter]);
 
   const formatVolume = (vol) => {
     if (typeof vol === 'string') return vol;
     if (typeof vol === 'number') return `${vol.toFixed(2)} SOL`;
     return '0 SOL';
   };
+
+  const filters = [
+    { id: 'all', label: 'ALL' },
+    { id: 'active', label: 'MIGRATED + VOLUME' },
+    { id: 'migrations', label: 'MIGRATED' },
+    { id: 'volume', label: '24H VOLUME' },
+  ];
 
   return (
     <div style={{ 
@@ -97,7 +94,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
           initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+          style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
@@ -113,11 +110,11 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
               </h1>
               <span style={{
                 padding: '0.25rem 0.6rem',
-                background: 'rgba(80, 100, 140, 0.15)',
+                background: 'rgba(74, 222, 128, 0.15)',
                 borderRadius: '6px',
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: '0.6rem',
-                color: 'rgba(100, 130, 170, 0.8)',
+                color: 'rgba(74, 222, 128, 0.8)',
                 letterSpacing: '0.05em',
               }}>
                 LIVE
@@ -128,7 +125,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
               fontSize: '0.75rem',
               color: 'rgba(255, 255, 255, 0.4)',
             }}>
-              Top performing developers on pump.fun
+              Developers with migrated tokens + 24h volume
             </p>
           </div>
           <button
@@ -155,6 +152,33 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
           </button>
         </motion.div>
 
+        <motion.div
+          initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}
+        >
+          {filters.map(filter => (
+            <button
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id)}
+              style={{
+                padding: '0.5rem 0.75rem',
+                background: activeFilter === filter.id ? 'rgba(80, 100, 140, 0.2)' : 'rgba(255, 255, 255, 0.02)',
+                border: `1px solid ${activeFilter === filter.id ? 'rgba(80, 100, 140, 0.4)' : 'rgba(255, 255, 255, 0.04)'}`,
+                borderRadius: '8px',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: '0.65rem',
+                color: activeFilter === filter.id ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </motion.div>
+
         {loading && developers.length === 0 ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
             <div style={{ 
@@ -177,7 +201,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
             <motion.div
               initial={reducedMotion ? {} : { opacity: 0, y: 20 }}
               animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
             >
               <div style={{
                 background: 'linear-gradient(135deg, rgba(10, 14, 22, 0.8) 0%, rgba(6, 8, 16, 0.9) 100%)',
@@ -207,10 +231,10 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                     fontWeight: 500,
                     color: 'rgba(255, 255, 255, 0.8)',
                   }}>
-                    Today's Leaders
+                    Top Developers
                   </span>
                   <span style={{ marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.3)' }}>
-                    {developers.length} devs
+                    {developers.length} active
                   </span>
                 </div>
 
@@ -262,16 +286,18 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                             fontWeight: 500,
                             color: 'rgba(255, 255, 255, 0.85)',
                           }}>
-                            {formatAddress(dev.address)}
+                            {dev.name}
                           </span>
-                          {dev.rank <= 3 && (
+                          {dev.hasMigrations && (
                             <span style={{
-                              fontFamily: "'Archivo', sans-serif",
-                              fontSize: '0.6rem',
-                              color: dev.rank === 1 ? 'rgba(255, 193, 7, 0.8)' : dev.rank === 2 ? 'rgba(156, 163, 175, 0.8)' : 'rgba(205, 127, 50, 0.8)',
-                              letterSpacing: '0.05em',
+                              padding: '0.1rem 0.35rem',
+                              background: 'rgba(74, 222, 128, 0.15)',
+                              borderRadius: '4px',
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: '0.5rem',
+                              color: 'rgba(74, 222, 128, 0.8)',
                             }}>
-                              #{dev.rank}
+                              MIGRATED
                             </span>
                           )}
                         </div>
@@ -280,7 +306,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                           fontSize: '0.6rem',
                           color: 'rgba(255, 255, 255, 0.3)',
                         }}>
-                          {dev.todayTokens || 0} tokens · {dev.winRate || '0%'} wins
+                          {dev.totalDeployments} deployed · {dev.migratedTokens} migrated
                         </span>
                       </div>
 
@@ -292,7 +318,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                           color: 'rgba(74, 222, 128, 0.9)',
                           margin: 0,
                         }}>
-                          {formatVolume(dev.todayVolume)}
+                          {formatVolume(dev.volume24h)}/24h
                         </p>
                       </div>
                     </motion.div>
@@ -326,14 +352,14 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                     fontWeight: 500,
                     color: 'rgba(255, 255, 255, 0.8)',
                   }}>
-                    Recent Deployments
+                    Hot Tokens
                   </span>
                 </div>
 
                 <div style={{ padding: '0.5rem 0.75rem' }}>
-                  {recentWins.length > 0 ? recentWins.map((win, index) => (
+                  {topTokens.length > 0 ? topTokens.map((token, index) => (
                     <motion.div
-                      key={win.tokenMint || index}
+                      key={token.mint || index}
                       initial={reducedMotion ? {} : { opacity: 0, x: 10 }}
                       animate={reducedMotion ? {} : { opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 + index * 0.05 }}
@@ -346,22 +372,41 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
-                        <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '0.65rem',
+                            color: 'rgba(255, 255, 255, 0.4)',
+                          }}>
+                            #{index + 1}
+                          </span>
                           <span style={{
                             fontFamily: "'Archivo', sans-serif",
                             fontSize: '0.85rem',
                             fontWeight: 500,
                             color: 'rgba(255, 255, 255, 0.85)',
                           }}>
-                            {win.tokenMint ? formatAddress(win.tokenMint) : 'Unknown'}
+                            {token.mint?.slice(0, 8)}...
                           </span>
+                          {token.migrated && (
+                            <span style={{
+                              padding: '0.1rem 0.3rem',
+                              background: 'rgba(74, 222, 128, 0.15)',
+                              borderRadius: '4px',
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: '0.45rem',
+                              color: 'rgba(74, 222, 128, 0.8)',
+                            }}>
+                              ✓
+                            </span>
+                          )}
                         </div>
                         <span style={{
                           fontFamily: "'JetBrains Mono', monospace",
                           fontSize: '0.55rem',
                           color: 'rgba(255, 255, 255, 0.3)',
                         }}>
-                          {win.time}
+                          {token.createdAt}
                         </span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -370,20 +415,20 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                           fontSize: '0.6rem',
                           color: 'rgba(255, 255, 255, 0.4)',
                         }}>
-                          by {win.developer}
+                          by {token.creator}
                         </span>
                         <span style={{
                           fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: '0.55rem',
-                          color: 'rgba(74, 222, 128, 0.7)',
+                          fontSize: '0.7rem',
+                          color: 'rgba(74, 222, 128, 0.8)',
                         }}>
-                          {formatVolume(win.solAmount)}
+                          {formatVolume(token.volume24h)}
                         </span>
                       </div>
                     </motion.div>
                   )) : (
                     <div style={{ padding: '2rem', textAlign: 'center' }}>
-                      <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.3)' }}>No recent deployments</p>
+                      <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.3)' }}>No active tokens</p>
                     </div>
                   )}
                 </div>
@@ -438,11 +483,12 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                   }}>
                     <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left' }}>RANK</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>DEVELOPER</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>TOKENS</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>VOLUME</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>DEPLOYED</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>MIGRATED</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>24H VOLUME</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>WIN RATE</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>LAST ACTIVE</th>
-                    <th style={{ padding: '0.75rem 1.5rem', textAlign: 'right' }}>TOTAL PnL</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>STATUS</th>
+                    <th style={{ padding: '0.75rem 1.5rem', textAlign: 'right' }}>LAST ACTIVE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -469,25 +515,32 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                       <td style={{ padding: '1rem 1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <span style={{ fontSize: '1.2rem' }}>{dev.avatar}</span>
-                            <div>
-                              <p style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)', margin: 0 }}>{formatAddress(dev.address)}</p>
-                            </div>
+                          <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.name}</span>
                         </div>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.todayTokens || 0}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.totalDeployments}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{formatVolume(dev.todayVolume)}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: dev.migratedTokens > 0 ? 'rgba(74, 222, 128, 0.8)' : 'rgba(255, 255, 255, 0.4)' }}>{dev.migratedTokens}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(74, 222, 128, 0.8)' }}>{dev.winRate || '0%'}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{formatVolume(dev.volume24h)}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.4)' }}>{dev.lastActive || 'N/A'}</span>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(74, 222, 128, 0.8)' }}>{dev.winRate}</span>
+                      </td>
+                      <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
+                        {dev.hasMigrations && dev.has24hVolume ? (
+                          <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(74, 222, 128, 0.15)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(74, 222, 128, 0.8)' }}>ACTIVE</span>
+                        ) : dev.hasMigrations ? (
+                          <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(255, 193, 7, 0.15)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 193, 7, 0.8)' }}>MIGRATED</span>
+                        ) : (
+                          <span style={{ padding: '0.2rem 0.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.3)' }}>NEW</span>
+                        )}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(74, 222, 128, 0.9)' }}>{formatVolume(dev.totalPnl)}</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.4)' }}>{dev.lastActive}</span>
                       </td>
                     </tr>
                   ))}
