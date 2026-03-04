@@ -28,7 +28,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
         setDevelopers(devsWithAvatars);
       }
       
-      const recentRes = await fetch('/api/developers/recent?limit=10');
+      const recentRes = await fetch('/api/developers-recent?limit=10');
       const recentData = await recentRes.json();
       
       if (recentData.success) {
