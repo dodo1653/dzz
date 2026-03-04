@@ -311,26 +311,6 @@ function getTopTokens(limit = 10) {
     }));
 }
 
-function getMockDevelopers() {
-  return [
-    { address: '7xKXtg2r8s9Qm3qF4RkP5Yh', name: 'dev_7xKXtg', totalDeployments: 47, migratedTokens: 18, migrationRate: '38%', totalVolume: '156000', volume24h: '24500', wins: 18, winRate: '38%', hasEnoughMigrations: true, hasEnoughVolume24h: true, lastActive: '2m ago', score: 4500, rank: 1 },
-    { address: '9mNpq5t3w8Kj2Lr6OpQ3Xz', name: 'dev_9mNpq5', totalDeployments: 62, migratedTokens: 28, migrationRate: '45%', totalVolume: '234000', volume24h: '32100', wins: 28, winRate: '45%', hasEnoughMigrations: true, hasEnoughVolume24h: true, lastActive: '5m ago', score: 6200, rank: 2 },
-    { address: '2kLqv1x8wP3Nm5H4JkR7Yb', name: 'dev_2kLqv1', totalDeployments: 31, migratedTokens: 9, migrationRate: '29%', totalVolume: '89000', volume24h: '18200', wins: 9, winRate: '29%', hasEnoughMigrations: true, hasEnoughVolume24h: true, lastActive: '1m ago', score: 2800, rank: 3 },
-    { address: '5pRt9y4z6Wc8N2Q3VmP6Xs', name: 'dev_5pRt9y', totalDeployments: 55, migratedTokens: 14, migrationRate: '25%', totalVolume: '123000', volume24h: '19800', wins: 14, winRate: '25%', hasEnoughMigrations: true, hasEnoughVolume24h: true, lastActive: '8m ago', score: 3100, rank: 4 },
-    { address: '8wXy3u6v5T7R1K9LmN4Qw', name: 'dev_8wXy3u', totalDeployments: 28, migratedTokens: 8, migrationRate: '29%', totalVolume: '67000', volume24h: '15600', wins: 8, winRate: '29%', hasEnoughMigrations: true, hasEnoughVolume24h: true, lastActive: '12m ago', score: 2100, rank: 5 },
-    { address: '3nOp7q2w9Xy4K6L8JmN3Pv', name: 'dev_3nOp7q', totalDeployments: 19, migratedTokens: 4, migrationRate: '21%', totalVolume: '45000', volume24h: '9200', wins: 4, winRate: '21%', hasEnoughMigrations: true, hasEnoughVolume24h: false, lastActive: '3m ago', score: 800, rank: 6 },
-  ];
-}
-
-function getMockTokens() {
-  return [
-    { mint: 'EPjFWdd5Ehqks...', creator: '7xKX...5Yh', volume24h: '24500', migrated: true, migrationPercent: 100, createdAt: '2m ago' },
-    { mint: 'ATokenkVEGt2K...', creator: '9mNp...Q3Xz', volume24h: '18900', migrated: true, migrationPercent: 100, createdAt: '5m ago' },
-    { mint: 'So111111111111...', creator: '2kLq...7Yb', volume24h: '12300', migrated: false, migrationPercent: 45, createdAt: '1m ago' },
-    { mint: 'orcaEKTdK7D7sF...', creator: '5pRt...P6Xs', volume24h: '8900', migrated: true, migrationPercent: 100, createdAt: '8m ago' },
-  ];
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -348,11 +328,6 @@ export default async function handler(req, res) {
     const MIN_MIGRATION_RATE = 20;
     
     let developers_data = calculateDeveloperStats();
-    
-    if (developers_data.length === 0) {
-      console.log('No indexed data, using mock data');
-      developers_data = getMockDevelopers();
-    }
     
     if (filter === 'migrations') {
       developers_data = developers_data.filter(d => parseFloat(d.migrationRate) >= MIN_MIGRATION_RATE);
@@ -373,7 +348,7 @@ export default async function handler(req, res) {
     const limit = parseInt(req.query.limit) || 20;
     developers_data = developers_data.slice(0, limit);
     
-    const topTokens = tokens.size > 0 ? getTopTokens(10) : getMockTokens();
+    const topTokens = tokens.size > 0 ? getTopTokens(10) : [];
     
     res.json({
       success: true,
