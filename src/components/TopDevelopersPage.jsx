@@ -2,8 +2,6 @@ import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
 
-const avatars = ['👑', '🚀', '🧙', '🎯', '📡', '⚡', '🔥', '💎', '🦊', '🐺', '🦁', '🐉', '⚔️', '🛡️', '🌟', '💰', '🎮', '🔮', '🪐', '🌙'];
-
 const TopDevelopersPage = memo(function TopDevelopersPage() {
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -24,7 +22,6 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
       if (data.success) {
         const devsWithAvatars = data.data.map((dev, i) => ({
           ...dev,
-          avatar: avatars[i % avatars.length],
           rank: i + 1
         }));
         setDevelopers(devsWithAvatars);
@@ -265,26 +262,6 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '10px',
-                        background: dev.rank === 1 
-                          ? 'linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1))'
-                          : dev.rank === 2
-                          ? 'linear-gradient(135deg, rgba(156, 163, 175, 0.2), rgba(156, 163, 175, 0.1))'
-                          : dev.rank === 3
-                          ? 'linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1))'
-                          : 'rgba(255, 255, 255, 0.03)',
-                        border: dev.rank <= 3 ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.1rem',
-                      }}>
-                        {dev.avatar}
-                      </div>
-
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' }}>
                           <span style={{
@@ -520,10 +497,7 @@ const TopDevelopersPage = memo(function TopDevelopersPage() {
                         </span>
                       </td>
                       <td style={{ padding: '1rem 1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <span style={{ fontSize: '1.2rem' }}>{dev.avatar}</span>
-                          <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.name}</span>
-                        </div>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.name}</span>
                       </td>
                       <td style={{ padding: '1rem 1rem', textAlign: 'right' }}>
                         <span style={{ fontFamily: "'Archivo', sans-serif", fontSize: '0.85rem', color: 'rgba(255, 255, 255, 0.7)' }}>{dev.totalDeployments}</span>
