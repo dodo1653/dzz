@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
+import TiltCard from './TiltCard';
 
 const AnimatedHeading = memo(function AnimatedHeading({ text, highlightWord, isInView }) {
   const words = text.split(' ');
@@ -198,30 +199,31 @@ const FeatureCard = memo(function FeatureCard({ feature }) {
   const iconColor = iconColors[feature.icon] || 'rgba(255, 255, 255, 0.6)';
   
   return (
-    <motion.div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        flexShrink: 0,
-        width: '320px',
-        padding: '24px',
-        background: isHovered 
-          ? 'linear-gradient(165deg, rgba(18, 18, 28, 0.98) 0%, rgba(12, 12, 20, 0.98) 100%)'
-          : 'linear-gradient(165deg, rgba(14, 14, 24, 0.92) 0%, rgba(10, 10, 18, 0.95) 100%)',
-        borderRadius: '16px',
-        border: isHovered 
-          ? '1px solid rgba(255, 255, 255, 0.08)' 
-          : '1px solid rgba(255, 255, 255, 0.04)',
-        boxShadow: isHovered 
-          ? '0 24px 48px -16px rgba(0, 0, 0, 0.5)'
-          : '0 12px 32px -12px rgba(0, 0, 0, 0.4)',
-        cursor: 'default',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+    <TiltCard intensity={8} className="feature-card">
+      <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          flexShrink: 0,
+          width: '320px',
+          padding: '24px',
+          background: isHovered 
+            ? 'linear-gradient(165deg, rgba(18, 18, 28, 0.98) 0%, rgba(12, 12, 20, 0.98) 100%)'
+            : 'linear-gradient(165deg, rgba(14, 14, 24, 0.92) 0%, rgba(10, 10, 18, 0.95) 100%)',
+          borderRadius: '16px',
+          border: isHovered 
+            ? '1px solid rgba(255, 255, 255, 0.08)' 
+            : '1px solid rgba(255, 255, 255, 0.04)',
+          boxShadow: isHovered 
+            ? '0 24px 48px -16px rgba(0, 0, 0, 0.5)'
+            : '0 12px 32px -12px rgba(0, 0, 0, 0.4)',
+          cursor: 'default',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
       <div style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -268,6 +270,7 @@ const FeatureCard = memo(function FeatureCard({ feature }) {
         </div>
       </div>
     </motion.div>
+    </TiltCard>
   );
 });
 
