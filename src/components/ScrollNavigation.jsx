@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect, memo } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useReducedMotion, useMediaQuery } from '../hooks/useReducedMotion';
-import TiltCard from './TiltCard';
 
 const AnimatedHeading = memo(function AnimatedHeading({ text, highlightWord, isInView }) {
   const words = text.split(' ');
@@ -195,82 +194,214 @@ const icons = {
 };
 
 const FeatureCard = memo(function FeatureCard({ feature }) {
+  const cardRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const iconColor = iconColors[feature.icon] || 'rgba(255, 255, 255, 0.6)';
-  
+  const reducedMotion = useReducedMotion();
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePos({ x, y });
+  };
+
+  const rotateX = isHovered ? -mousePos.y * 12 : 0;
+  const rotateY = isHovered ? mousePos.x * 12 : 0;
+
   return (
-    <TiltCard intensity={8} className="feature-card">
+    <motion.div
+      ref={cardRef}
+      onMouseEnter={(e) => { setIsHovered(true); handleMouseMove(e); }}
+      onMouseLeave={() => { setIsHovered(false); setMousePos({ x: 0, y: 0 }); }}
+      onMouseMove={handleMouseMove}
+      animate={{
+        rotateX,
+        rotateY,
+        y: isHovered ? -8 : 0,
+        scale: isHovered ? 1.02 : 1,
+      }}
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 20,
+        mass: 0.5,
+      }}
+      style={{
+        flexShrink: 0,
+        width: '320px',
+        padding: '28px',
+        background: 'linear-gradient(165deg, rgba(16, 16, 26, 0.95) 0%, rgba(8, 8, 14, 0.98) 100%)',
+        borderRadius: '20px',
+        border: `1px solid ${isHovered ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)'}`,
+        boxShadow: isHovered 
+          ? '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 40px rgba(80, 96, 128, 0.08)'
+          : '0 16px 40px -16px rgba(0, 0, 0, 0.5)',
+        cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
+        transformStyle: 'preserve-3d',
+        perspective: '1200px',
+        willChange: 'transform',
+      }}
+    >
       <motion.div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          flexShrink: 0,
-          width: '320px',
-          padding: '24px',
-          background: isHovered 
-            ? 'linear-gradient(165deg, rgba(18, 18, 28, 0.98) 0%, rgba(12, 12, 20, 0.98) 100%)'
-            : 'linear-gradient(165deg, rgba(14, 14, 24, 0.92) 0%, rgba(10, 10, 18, 0.95) 100%)',
-          borderRadius: '16px',
-          border: isHovered 
-            ? '1px solid rgba(255, 255, 255, 0.08)' 
-            : '1px solid rgba(255, 255, 255, 0.04)',
-          boxShadow: isHovered 
-            ? '0 24px 48px -16px rgba(0, 0, 0, 0.5)'
-            : '0 12px 32px -12px rgba(0, 0, 0, 0.4)',
-          cursor: 'default',
-          position: 'relative',
-          overflow: 'hidden',
+        animate={{
+          opacity: isHovered ? 1 : 0,
+          x: isHovered ? 0 : -20,
         }}
-      >
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '200px',
+          height: '200px',
+          background: `radial-gradient(circle at 70% 30%, ${iconColor.replace('0.6', '0.08')} 0%, transparent 60%)`,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <motion.div
+        animate={{
+          opacity: isHovered ? 1 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: `linear-gradient(90deg, transparent, ${iconColor.replace('0.6', '0.3')}, transparent)`,
+        }}
+      />
+
       <div style={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '16px',
-        marginBottom: '14px',
+        gap: '18px',
+        position: 'relative',
+        zIndex: 1,
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '10px',
-          background: `linear-gradient(135deg, ${iconColor.replace('0.85', '0.15')} 0%, ${iconColor.replace('0.85', '0.05')} 100%)`,
-          border: `1px solid ${iconColor.replace('0.85', '0.2')}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: iconColor,
-          flexShrink: 0,
-        }}>
+        <motion.div
+          animate={{
+            scale: isHovered ? 1.1 : 1,
+            rotate: isHovered ? 5 : 0,
+          }}
+          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '14px',
+            background: `linear-gradient(135deg, ${iconColor.replace('0.6', '0.12')} 0%, ${iconColor.replace('0.6', '0.04')} 100%)`,
+            border: `1px solid ${iconColor.replace('0.6', '0.2')}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: iconColor,
+            flexShrink: 0,
+            boxShadow: isHovered ? `0 8px 24px ${iconColor.replace('0.6', '0.15')}` : 'none',
+          }}
+        >
           {icons[feature.icon]}
-        </div>
+        </motion.div>
+        
         <div style={{ flex: 1 }}>
-          <h3 style={{
-            fontFamily: "'Archivo', sans-serif",
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            color: isHovered ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.75)',
-            margin: 0,
-            marginBottom: '8px',
-            letterSpacing: '-0.01em',
-            transition: 'color 0.2s ease',
-          }}>
+          <motion.h3
+            animate={{
+              color: isHovered ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
+              x: isHovered ? 4 : 0,
+            }}
+            transition={{ duration: 0.2 }}
+            style={{
+              fontFamily: "'Archivo', sans-serif",
+              fontSize: '1rem',
+              fontWeight: 500,
+              margin: 0,
+              marginBottom: '10px',
+              letterSpacing: '-0.01em',
+            }}
+          >
             {feature.title}
-          </h3>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: '0.68rem',
-            color: 'rgba(255, 255, 255, 0.38)',
-            lineHeight: 1.6,
-            margin: 0,
-            letterSpacing: '0.01em',
-          }}>
+          </motion.h3>
+          <motion.p
+            animate={{
+              color: isHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.38)',
+            }}
+            transition={{ duration: 0.2 }}
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: '0.7rem',
+              lineHeight: 1.7,
+              margin: 0,
+              letterSpacing: '0.01em',
+            }}
+          >
             {feature.description}
-          </p>
+          </motion.p>
         </div>
       </div>
+
+      <motion.div
+        animate={{
+          opacity: isHovered ? 1 : 0,
+          y: isHovered ? 0 : 10,
+        }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          right: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+      >
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: '0.6rem',
+          color: iconColor,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}>
+          Explore
+        </span>
+        <motion.span
+          animate={{ x: isHovered ? 4 : 0 }}
+          style={{ color: iconColor, fontSize: '0.7rem' }}
+        >
+          →
+        </motion.span>
+      </motion.div>
+
+      {!reducedMotion && (
+        <motion.div
+          animate={{
+            y: [0, -6, 0],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: Math.random() * 2,
+          }}
+          style={{
+            position: 'absolute',
+            bottom: '-30px',
+            right: '-30px',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${iconColor.replace('0.6', '0.05')} 0%, transparent 70%)`,
+            filter: 'blur(20px)',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
     </motion.div>
-    </TiltCard>
   );
 });
 
