@@ -275,15 +275,26 @@ const ContextEnginePage = memo(function ContextEnginePage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          background: 'rgba(0, 0, 0, 0.15)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.5)',
-              boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
-            }} />
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, rgba(100, 120, 160, 0.15) 0%, rgba(80, 100, 140, 0.1) 100%)',
+              border: '1px solid rgba(100, 140, 180, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{
+                fontFamily: "'Archivo', sans-serif",
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'rgba(255, 255, 255, 0.7)',
+              }}>AI</span>
+            </div>
             <div>
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
@@ -320,6 +331,13 @@ const ContextEnginePage = memo(function ContextEnginePage() {
             >
               ONLINE
             </motion.span>
+            <div style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: 'rgba(74, 222, 128, 0.6)',
+              boxShadow: '0 0 8px rgba(74, 222, 128, 0.4)',
+            }} />
           </div>
         </div>
 
@@ -373,10 +391,11 @@ const ContextEnginePage = memo(function ContextEnginePage() {
                       ? '14px 14px 4px 14px' 
                       : '14px 14px 14px 4px',
                     background: message.role === 'user'
-                      ? 'rgba(255, 255, 255, 0.04)'
-                      : 'rgba(255, 255, 255, 0.02)',
-                    border: '1px solid rgba(255, 255, 255, 0.03)',
+                      ? 'rgba(80, 100, 140, 0.12)'
+                      : 'rgba(255, 255, 255, 0.025)',
+                    border: `1px solid ${message.role === 'user' ? 'rgba(100, 140, 180, 0.15)' : 'rgba(255, 255, 255, 0.03)'}`,
                     position: 'relative',
+                    boxShadow: message.role === 'user' ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none',
                   }}>
                   {message.role === 'assistant' && (
                     <div style={{
@@ -472,50 +491,52 @@ const ContextEnginePage = memo(function ContextEnginePage() {
             borderTop: '1px solid rgba(255, 255, 255, 0.03)',
             display: 'flex',
             gap: '1rem',
+            background: 'rgba(0, 0, 0, 0.1)',
           }}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="Ask about any token or wallet..."
-              disabled={isTyping}
-              style={{
-                flex: 1,
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: `1px solid ${isFocused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.04)'}`,
-                borderRadius: '12px',
-                padding: '0.85rem 1.15rem',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.85rem',
-                color: 'rgba(255, 255, 255, 0.85)',
-                outline: 'none',
-                transition: 'border-color 0.2s ease',
-              }}
-            />
+            <div style={{ flex: 1, position: 'relative' }}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder="Ask about any token or wallet..."
+                disabled={isTyping}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255, 255, 255, 0.025)',
+                  border: `1px solid ${isFocused ? 'rgba(100, 140, 180, 0.25)' : 'rgba(255, 255, 255, 0.04)'}`,
+                  borderRadius: '12px',
+                  padding: '0.85rem 1.15rem',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '0.85rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isFocused ? '0 0 20px rgba(80, 100, 140, 0.1)' : 'none',
+                }}
+              />
+            </div>
             <button
               type="submit"
-              disabled={isTyping || !input.trim()}
+              disabled={!input.trim() || isTyping}
               style={{
-                padding: '0.85rem 1.35rem',
-                background: isTyping || !input.trim()
-                  ? 'rgba(255, 255, 255, 0.03)'
-                  : 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
+                padding: '0.85rem 1.5rem',
+                background: input.trim() && !isTyping 
+                  ? 'linear-gradient(135deg, rgba(100, 140, 180, 0.3) 0%, rgba(80, 100, 140, 0.2) 100%)'
+                  : 'rgba(255, 255, 255, 0.03)',
+                border: input.trim() && !isTyping
+                  ? '1px solid rgba(100, 140, 180, 0.25)'
+                  : '1px solid rgba(255, 255, 255, 0.03)',
                 borderRadius: '12px',
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                color: isTyping || !input.trim()
-                  ? 'rgba(255, 255, 255, 0.3)'
-                  : 'rgba(255, 255, 255, 0.7)',
-                cursor: isTyping || !input.trim() ? 'not-allowed' : 'pointer',
+                cursor: input.trim() && !isTyping ? 'pointer' : 'default',
                 transition: 'all 0.2s ease',
-                letterSpacing: '0.02em',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
-            >
+              >
               SEND
             </button>
           </div>
