@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useTransform as useTransformMotion, useInView } from 'framer-motion';
 import HolographicTerminal from './HolographicTerminal';
-import MacBookFrame from './MacBookFrame';
 import TypingText from '../TypingText';
 import { useReducedMotion, useMediaQuery } from '../../hooks/useReducedMotion';
 
@@ -378,18 +377,16 @@ const HeroSection = function HeroSection({
               <div style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: '1rem',
+                gap: '1.5rem',
                 justifyContent: 'center',
                 alignItems: isMobile ? 'center' : 'center',
               }}>
-              <motion.div
+                <motion.div
                   initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                   transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <MacBookFrame title="radar_terminal" showVolume={false}>
-                    <HolographicTerminal width={isMobile ? 300 : 380} height={isMobile ? 260 : 320} />
-                  </MacBookFrame>
+                  <HolographicTerminal width={isMobile ? 340 : 400} height={isMobile ? 320 : 380} />
                 </motion.div>
                 
                 {/* Vertical pump.fun text BETWEEN the cards */}
@@ -399,7 +396,7 @@ const HeroSection = function HeroSection({
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '320px',
+                    height: '380px',
                     padding: '0 0.5rem',
                   }}>
                     {"pump.fun".split('').map((char, i) => (
@@ -428,7 +425,7 @@ const HeroSection = function HeroSection({
                   </div>
                 )}
                 
-                {/* Activity Panel - styled as secondary MacBook window */}
+                {/* Activity Panel */}
                 <motion.div
                   ref={activityRef}
                   onMouseMove={handleActivityMouseMove}
@@ -439,8 +436,8 @@ const HeroSection = function HeroSection({
                   whileHover={{ y: -6, scale: 1.01 }}
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   style={{
-                    width: isMobile ? '340px' : '380px',
-                    height: isMobile ? 260 : 320,
+                    width: isMobile ? '340px' : '400px',
+                    height: isMobile ? 320 : 380,
                     perspective: 1000,
                     transformStyle: 'preserve-3d',
                   }}
@@ -460,13 +457,13 @@ const HeroSection = function HeroSection({
                         width: '100%',
                         height: '100%',
                         background: 'linear-gradient(165deg, rgba(12, 16, 26, 0.98) 0%, rgba(8, 10, 18, 0.98) 100%)',
-                        borderRadius: '12px',
+                        borderRadius: '20px',
                         border: isActivityHovered 
-                          ? '1px solid rgba(60, 90, 130, 0.25)' 
-                          : '1px solid rgba(80, 100, 140, 0.2)',
+                          ? '1px solid rgba(60, 90, 130, 0.2)' 
+                          : '1px solid rgba(255, 255, 255, 0.03)',
                         boxShadow: isActivityHovered 
-                          ? '0 25px 50px -20px rgba(0, 0, 0, 0.6), 0 0 40px rgba(60, 80, 120, 0.1)'
-                          : '0 20px 40px -16px rgba(0, 0, 0, 0.5), 0 0 30px rgba(50, 70, 100, 0.06)',
+                          ? '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 30px rgba(40, 60, 100, 0.06)'
+                          : '0 20px 50px -20px rgba(0, 0, 0, 0.45)',
                         overflow: 'hidden',
                         backdropFilter: 'blur(20px)',
                         transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
@@ -506,45 +503,45 @@ const HeroSection = function HeroSection({
                           top: 0,
                           left: 0,
                           right: 0,
-                          height: '36px',
+                          height: '40px',
                           background: 'rgba(0, 0, 0, 0.25)',
                           borderBottom: '1px solid rgba(255, 255, 255, 0.025)',
                           display: 'flex',
                           alignItems: 'center',
-                          padding: '0 12px',
-                          gap: '6px',
+                          padding: '0 16px',
+                          gap: '8px',
                           zIndex: 3,
                         }}
                       >
                         <motion.div 
                           animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
-                          style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#ff5f57' }}
                         />
                         <motion.div 
                           animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
                           transition={{ delay: 0.02 }}
-                          style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#ffbd2e' }}
                         />
                         <motion.div 
                           animate={isActivityHovered ? { scale: 1.15 } : { scale: 1 }}
                           transition={{ delay: 0.04 }}
-                          style={{ width: 10, height: 10, borderRadius: '50%', background: '#28ca41' }}
+                          style={{ width: 12, height: 12, borderRadius: '50%', background: '#28ca41' }}
                         />
                         <motion.div
                           animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 2, repeat: Infinity }}
                           style={{
-                            width: '5px',
-                            height: '5px',
+                            width: '6px',
+                            height: '6px',
                             borderRadius: '50%',
                             background: 'rgba(80, 120, 160, 0.7)',
-                            boxShadow: '0 0 6px rgba(80, 120, 160, 0.4)',
-                            marginLeft: '8px',
+                            boxShadow: '0 0 8px rgba(80, 120, 160, 0.4)',
+                            marginLeft: '12px',
                           }}
                         />
                         <span style={{
                           fontFamily: "'Archivo', sans-serif",
-                          fontSize: '10px',
+                          fontSize: '11px',
                           color: isActivityHovered ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.3)',
                           letterSpacing: '0.1em',
                           transition: 'color 0.3s ease',
@@ -556,11 +553,11 @@ const HeroSection = function HeroSection({
                       {/* Content */}
                       <div style={{
                         position: 'absolute',
-                        top: '40px',
+                        top: '48px',
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        padding: '12px 16px',
+                        padding: '16px 20px',
                         overflow: 'hidden',
                         zIndex: 3,
                       }}>
