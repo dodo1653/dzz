@@ -1,133 +1,118 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import React, { useEffect, useRef, useState, memo } from 'react';
 
-const CustomCursor = () => {
+const CustomCursor = memo(function CustomCursor() {
   const cursorRef = useRef(null);
-  const cursorDotRef = useRef(null);
+  const trailingRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  const springConfig = { damping: 25, stiffness: 700 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
-  
-  const smoothCursorX = useMotionValue(0);
-  const smoothCursorY = useMotionValue(0);
-  
+  const position = useRef({ x: 0, y: 0 });
+  const trailingPosition = useRef({ x: 0, y: 0 });
+  const animationRef = useRef(null);
+
   useEffect(() => {
-    const lerp = (start, end, factor) => start + (end - start) * factor;
-    let animationFrame;
-    let currentX = 0;
-    let currentY = 0;
+    const cursor = cursorRef.current;
+    const trailing = trailingRef.current;
     
-    const animate = () => {
-      currentX = lerp(currentX, mouseX.get(), 0.15);
-      currentY = lerp(currentY, mouseY.get(), 0.15);
-      
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate(${currentX}px, ${currentY}px)`;
-      }
-      
-      animationFrame = requestAnimationFrame(animate);
+    if (!cursor || !trailing) return;
+
+    const handleMouseMove = (e) => {
+      position.current = { x: e.clientX, y: e.clientY };
+      if (!isVisible) setIsVisible(true);
     };
+
+    const handleMouseEnter = () => setIsVisible(true);
+    const handleMouseLeave = () => setIsVisible(false);
+
+    const handleHoverChange = (e) => {
+      const target = e.target;
+      const isInteractive = 
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.classList.contains('cursor-pointer') ||
+        target.getAttribute('role') === 'button';
+      
+      setIsHovering(!!isInteractive);
+    };
+
+    const animate = () => {
+      const trailingEase = 0.12;
+      
+      trailingPosition.current.x += (position.current.x - trailingPosition.current.x) * trailingEase;
+      trailingPosition.current.y += (position.current.y - trailingPosition.current.y) * trailingEase;
+      
+      cursor.style.transform = `translate(${position.current.x}px, ${position.current.y}px)`;
+      trailing.style.transform = `translate(${trailingPosition.current.x}px, ${trailingPosition.current.y}px)`;
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseover', handleHoverChange);
     
     animate();
-    
-    return () => cancelAnimationFrame(animationFrame);
-  }, [mouseX, mouseY]);
 
-  const handleMouseMove = useCallback((e) => {
-    mouseX.set(e.clientX - 16);
-    mouseY.set(e.clientY - 16);
-    setIsVisible(true);
-  }, [mouseX, mouseY]);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsVisible(false);
-  }, []);
-
-  const handleMouseOver = useCallback((e) => {
-    const target = e.target;
-    const isInteractive = 
-      target.tagName === 'A' ||
-      target.tagName === 'BUTTON' ||
-      target.closest('a') ||
-      target.closest('button') ||
-      target.getAttribute('role') === 'button' ||
-      target.classList.contains('cursor-pointer');
-    
-    setIsHovering(!!isInteractive);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseover', handleMouseOver);
-    
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseover', handleHoverChange);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
-  }, [handleMouseMove, handleMouseLeave, handleMouseOver]);
-
-  if (!isVisible) return null;
+  }, [isVisible]);
 
   return (
     <>
-      <motion.div
+      <div
         ref={cursorRef}
         style={{
           position: 'fixed',
-          left: 0,
           top: 0,
-          width: isHovering ? '48px' : '32px',
-          height: isHovering ? '48px' : '32px',
+          left: 0,
+          width: isHovering ? '10px' : '6px',
+          height: isHovering ? '10px' : '6px',
           borderRadius: '50%',
-          border: '1px solid rgba(100, 130, 170, 0.5)',
-          background: 'rgba(100, 130, 170, 0.05)',
+          background: 'rgba(255, 255, 255, 0.95)',
           pointerEvents: 'none',
           zIndex: 99999,
-          x: cursorX,
-          y: cursorY,
-          mixBlendMode: 'difference',
-        }}
-        animate={{
-          scale: isHovering ? 1.2 : 1,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 500,
-          damping: 28,
+          marginLeft: isHovering ? -5 : -3,
+          marginTop: isHovering ? -5 : -3,
+          opacity: isVisible ? 1 : 0,
+          transition: 'width 0.2s ease, height 0.2s ease, opacity 0.3s ease',
+          boxShadow: '0 0 12px rgba(255, 255, 255, 0.6)',
         }}
       />
       <div
-        ref={cursorDotRef}
+        ref={trailingRef}
         style={{
           position: 'fixed',
-          left: mouseX.get() + 16,
-          top: mouseY.get() + 16,
-          width: '6px',
-          height: '6px',
+          top: 0,
+          left: 0,
+          width: isHovering ? '36px' : '20px',
+          height: isHovering ? '36px' : '20px',
           borderRadius: '50%',
-          background: 'rgba(255, 255, 255, 0.8)',
+          border: '1px solid rgba(255, 255, 255, 0.25)',
           pointerEvents: 'none',
-          zIndex: 99999,
+          zIndex: 99998,
+          marginLeft: isHovering ? -18 : -10,
+          marginTop: isHovering ? -18 : -10,
+          opacity: isVisible ? 1 : 0,
+          transition: 'width 0.25s ease, height 0.25s ease, opacity 0.3s ease',
+          backdropFilter: 'blur(1px)',
+          background: 'rgba(255, 255, 255, 0.03)',
         }}
       />
       <style>{`
-        * {
-          cursor: none !important;
-        }
-        a, button, [role="button"], .cursor-pointer {
-          cursor: none !important;
-        }
+        * { cursor: none !important; }
+        a, button, [role="button"], .cursor-pointer { cursor: none !important; }
       `}</style>
     </>
   );
-};
+});
 
 export default CustomCursor;

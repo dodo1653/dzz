@@ -191,7 +191,15 @@ const HeroSection = function HeroSection({
       </div>
 
       {/* Main Content */}
-      <div
+      <motion.div
+        animate={{
+          y: [0, -8, 0],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
         style={{
           position: 'relative',
           zIndex: 2,
@@ -628,7 +636,7 @@ const HeroSection = function HeroSection({
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </section>
   );
 };
