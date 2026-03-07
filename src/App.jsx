@@ -14,8 +14,6 @@ import TopDevelopersPage from "./components/TopDevelopersPage.jsx";
 import { ScrollNavigationDots, PremiumFeatureSection } from "./components/ScrollNavigation.jsx";
 import Footer from "./components/Footer.jsx";
 import PricingSection from "./components/PricingSection.jsx";
-import CustomCursor from "./components/CustomCursor.jsx";
-import CursorReactiveBackground from "./components/CursorReactiveBackground.jsx";
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ConnectionProvider } from '@solana/wallet-adapter-react';
 import { WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
@@ -189,8 +187,6 @@ export default function App() {
     <ConnectionProvider endpoint={endpoint}>
       <SolanaWalletProvider wallets={wallets} autoConnect={false}>
         <WalletModalProvider>
-          <CustomCursor />
-          <CursorReactiveBackground />
           <Navigation />
           <CryptoTicker />
           <Layout>
